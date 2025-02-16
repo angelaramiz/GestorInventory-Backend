@@ -1,6 +1,6 @@
 import express from "express";
 import { obtenerProductos, agregarProducto } from "../services/supabase.js";
-import { escribirEnSheets } from "../services/sheets.js";
+import { escribirEnSheetsPorGid } from "../services/sheets.js";
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.post("/", async (req, res) => {
     // Agregar producto a Supabase
     const resultado = await agregarProducto(nuevoProducto);
     if (resultado) {
-        // Escribir en la hoja "Productos"
+        // Escribir en la hoja "Productos" usando su GID
         const datos = [[
             nuevoProducto.codigo,
             nuevoProducto.nombre,
@@ -30,7 +30,7 @@ router.post("/", async (req, res) => {
             nuevoProducto.marca,
             nuevoProducto.unidad
         ]];
-        await escribirEnSheets("Productos", "A1", datos); // Especificar la hoja "Productos"
+        await escribirEnSheetsPorGid(1882986845, "A1", datos); // Usar el GID de la hoja "Productos"
 
         res.json({ success: true, data: resultado });
     } else {
