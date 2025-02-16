@@ -12,6 +12,22 @@ const auth = new google.auth.GoogleAuth({
 const sheets = google.sheets({ version: "v4", auth });
 
 /**
+ * Función para limpiar los datos de una hoja específica.
+ * @param {string} sheetName - Nombre de la hoja (ej. "Productos").
+ */
+export async function limpiarHoja(sheetName) {
+    try {
+        await sheets.spreadsheets.values.clear({
+            spreadsheetId: process.env.SHEET_ID,
+            range: `${sheetName}!A1:Z1000` // Rango amplio para asegurar que se limpia todo
+        });
+        console.log(`Datos limpiados correctamente en la hoja "${sheetName}"`);
+    } catch (error) {
+        console.error(`Error limpiando la hoja "${sheetName}":`, error);
+    }
+}
+
+/**
  * Función para obtener los nombres y IDs de todas las hojas en el archivo.
  * @returns {Array<{nombre: string, gid: number}>} - Lista de hojas con sus nombres y IDs.
  */
@@ -71,5 +87,31 @@ export async function escribirEnSheetsPorGid(gid, range, datos) {
         await escribirEnSheetsPorNombre(hoja.nombre, range, datos);
     } catch (error) {
         console.error("Error escribiendo en Google Sheets:", error);
+    }
+}
+/**
+ * Función para sincronizar productos de Supabase con Google Sheets.
+ * @param {Array<Object>} productos - Lista de productos obtenida de Supabase.
+ * @param {string} sheetName - Nombre de la hoja (ej. "Productos").
+ */
+export async function sincronizarProductos(productos, sheetName) {
+    try {
+        // Limpiar la hoja antes de escribir nuevos datos
+        await limpiarHoja(sheetName);
+
+        // Formatear los productos como una matriz para Google Sheets
+        const datos = productos.map(producto => [
+            producto.codigo,
+            producto.nombre,
+            producto.categoria,
+            producto.marca,
+            producto.unidad
+        ]);
+
+        // Escribir los datos en la hoja
+        await escribirEnSheets(sheetName, datos);
+        console.log("Sincronización completada correctamente");
+    } catch (error) {
+        console.error("Error durante la sincronización:", error);
     }
 }
