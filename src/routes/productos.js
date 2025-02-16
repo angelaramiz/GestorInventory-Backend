@@ -13,9 +13,25 @@ router.get("/", async (req, res) => {
 // Agregar producto a Supabase y Google Sheets
 router.post("/", async (req, res) => {
     const nuevoProducto = req.body;
+
+    // Validar que los datos requeridos estén presentes
+    if (!nuevoProducto.codigo || !nuevoProducto.nombre || !nuevoProducto.categoria || !nuevoProducto.marca || !nuevoProducto.unidad) {
+        return res.status(400).json({ error: "Faltan campos obligatorios en el producto" });
+    }
+
+    // Agregar producto a Supabase
     const resultado = await agregarProducto(nuevoProducto);
     if (resultado) {
-        await escribirEnSheets([[nuevoProducto.codigo, nuevoProducto.nombre, nuevoProducto.categoria, nuevoProducto.marca, nuevoProducto.unidad]]);
+        // Escribir en la hoja "Productos"
+        const datos = [[
+            nuevoProducto.codigo,
+            nuevoProducto.nombre,
+            nuevoProducto.categoria,
+            nuevoProducto.marca,
+            nuevoProducto.unidad
+        ]];
+        await escribirEnSheets("Productos", "A1", datos); // Especificar la hoja "Productos"
+
         res.json({ success: true, data: resultado });
     } else {
         res.status(400).json({ error: "Error al agregar producto" });
