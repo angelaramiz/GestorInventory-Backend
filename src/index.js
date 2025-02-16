@@ -1,16 +1,16 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import productosRoutes from "./routes/productos.js";
 
+dotenv.config();
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// Ruta temporal para prueba
-app.get('/productos', (req, res) => {
-    res.json([{ codigo: '123', nombre: 'Producto de prueba' }]);
-});
+// Rutas
+app.use("/productos", productosRoutes);
 
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(`Servidor backend en http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
