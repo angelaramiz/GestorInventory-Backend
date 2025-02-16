@@ -1,6 +1,7 @@
 import express from "express";
 import { obtenerProductos, agregarProducto } from "../services/supabase.js";
 import { escribirEnSheetsPorGid, sincronizarProductos } from "../services/sheets.js";
+import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
 
@@ -42,15 +43,85 @@ router.post("/", async (req, res) => {
     }
 });
 
-// Sincronizar productos de Supabase con Google Sheets
-router.post("/sincronizar", async (req, res) => {
+// // Sincronizar productos de Supabase con Google Sheets
+// router.post("/sincronizar", async (req, res) => {
+//     try {
+//         // Obtener productos de Supabase
+//         const productos = await obtenerProductos();
+
+//         // Sincronizar productos con Google Sheets
+//         await sincronizarProductos(productos, "Productos");
+
+//         res.json({ success: true, message: "Sincronización completada correctamente" });
+//     } catch (error) {
+//         console.error("Error durante la sincronización:", error);
+//         res.status(500).json({ error: "Error durante la sincronización" });
+//     }
+// });
+
+// Ruta para registrar un nuevo usuario
+router.post("/registro", async (req, res) => {
+    const { email, password } = req.body;
+    const user = await registrarUsuario(email, password);
+
+    if (user) {
+        res.json({ success: true, user });
+    } else {
+        res.status(400).json({ error: "Error al registrar usuario" });
+    }
+});
+
+// Ruta para iniciar sesión
+router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    const user = await iniciarSesion(email, password);
+
+    if (user) {
+        res.json({ success: true, user });
+    } else {
+        res.status(400).json({ error: "Error al iniciar sesión" });
+    }
+});
+
+// Ruta para cerrar sesión
+router.post("/logout", async (req, res) => {
+    const success = await cerrarSesion();
+
+    if (success) {
+        res.json({ success: true });
+    } else {
+        res.status(400).json({ error: "Error al cerrar sesión" });
+    }
+});
+
+// Ruta para obtener el usuario actual
+router.get("/usuario", async (req, res) => {
+    const user = await obtenerUsuarioActual();
+
+    if (user) {
+        res.json({ success: true, user });
+    } else {
+        res.status(400).json({ error: "No hay usuario autenticado" });
+    }
+});
+
+// Aplicar el middleware a las rutas que necesitan protección
+router.get("/", verificarAutenticacion, async (req, res) => {
+    const productos = await obtenerProductos();
+    res.json(productos);
+});
+
+router.post("/", verificarAutenticacion, async (req, res) => {
+    const nuevoProducto = req.body;
+    const resultado = await agregarProducto(nuevoProducto);
+    res.json({ success: true, data: resultado });
+});
+
+// Otras rutas protegidas...
+router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
-        // Obtener productos de Supabase
         const productos = await obtenerProductos();
-
-        // Sincronizar productos con Google Sheets
         await sincronizarProductos(productos, "Productos");
-
         res.json({ success: true, message: "Sincronización completada correctamente" });
     } catch (error) {
         console.error("Error durante la sincronización:", error);
