@@ -52,17 +52,21 @@ export async function obtenerNombresDeHojas() {
  * @param {string} range - Rango donde se escribirán los datos (ej. "A1").
  * @param {Array<Array<string>>} datos - Datos a escribir en formato de matriz.
  */
-export async function escribirEnSheetsPorNombre(sheetName, range, datos) {
+export async function escribirEnSheets(datos) {
     try {
+        console.log("Intentando escribir en Google Sheets...");
+        console.log("Datos a escribir:", datos);
+
         await sheets.spreadsheets.values.append({
             spreadsheetId: process.env.SHEET_ID,
-            range: `${sheetName}!${range}`,
+            range: "Productos!A1",
             valueInputOption: "RAW",
             requestBody: { values: datos }
         });
-        console.log(`Datos escritos correctamente en la hoja "${sheetName}"`);
+
+        console.log("Datos escritos correctamente en Google Sheets");
     } catch (error) {
-        console.error(`Error escribiendo en la hoja "${sheetName}":`, error);
+        console.error("Error escribiendo en Google Sheets:", error);
     }
 }
 

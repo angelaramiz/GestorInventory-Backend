@@ -22,14 +22,19 @@ router.post("/", async (req, res) => {
     // Agregar producto a Supabase
     const resultado = await agregarProducto(nuevoProducto);
     if (resultado) {
-        // Escribir en la hoja "Productos" usando su GID
-        await escribirEnSheetsPorGid(1882986845, "A1", [[
+        console.log("Producto agregado en Supabase:", nuevoProducto);
+
+        // Escribir en Google Sheets
+        const datos = [[
             nuevoProducto.codigo,
             nuevoProducto.nombre,
             nuevoProducto.categoria,
             nuevoProducto.marca,
             nuevoProducto.unidad
-        ]]);
+        ]];
+        console.log("Datos formateados para Google Sheets:", datos);
+
+        await escribirEnSheets(datos);
 
         res.json({ success: true, data: resultado });
     } else {
