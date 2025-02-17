@@ -44,9 +44,9 @@ router.post("/registro", async (req, res) => {
     const user = await registrarUsuario(nombre, email, password);
 
     if (user) {
-        res.json({ success: true, user });
+        res.status(201).json({ success: true, user }); // 201: Created
     } else {
-        res.status(400).json({ error: "Error al registrar usuario" });
+        res.status(500).json({ error: "Error al registrar usuario" }); // 500: Internal Server Error
     }
 });
 
