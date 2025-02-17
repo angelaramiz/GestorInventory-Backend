@@ -25,7 +25,6 @@ export async function agregarProducto(producto) {
 // Función para registrar un nuevo usuario
 export async function registrarUsuario(nombre, email, password) {
     const { user, error } = await supabase.auth.signUp({
-        nombre,
         email,
         password,
     });
@@ -35,12 +34,22 @@ export async function registrarUsuario(nombre, email, password) {
         return null;
     }
 
+    // Almacenar el nombre en la tabla de usuarios
+    const { data, error: dbError } = await supabase
+        .from("usuarios")
+        .insert([{ id: user.id, nombre, email }]);
+
+    if (dbError) {
+        console.error("Error al guardar datos adicionales del usuario:", dbError);
+        return null;
+    }
+
     return user;
 }
 
 // Función para iniciar sesión
 export async function iniciarSesion(email, password) {
-    const { user, error } = await supabase.auth.signIn({
+    const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
@@ -50,7 +59,7 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
-    return user;
+    return data.user;
 }
 
 // Función para cerrar sesión
