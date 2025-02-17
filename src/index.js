@@ -10,7 +10,8 @@ app.use(express.json());
 app.use(cors({
     origin: [
         "https://gestorinventory.netlify.app",
-        "http://localhost:8158"
+        "http://localhost:8158",
+        "https://angelaramiz.github.io"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"], // Asegurar que Authorization está permitido
