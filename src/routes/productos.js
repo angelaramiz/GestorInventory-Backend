@@ -122,18 +122,27 @@ router.get("/prueba", async (req, res) => {
 });
 // Nueva ruta protegida para inventario
 router.post("/inventario", verificarAutenticacion, async (req, res) => {
+    const requiredFields = ['codigo', 'nombre', 'lote', 'cantidad'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+
+    if (missingFields.length > 0) {
+        return res.status(400).json({ 
+            error: `Faltan campos: ${missingFields.join(', ')}` 
+        });
+    }
+
     try {
-        const nuevoInventario = req.body;
-        const resultado = await agregarInventarioSupabase(nuevoInventario, req.user.id);
+        const resultado = await agregarInventarioSupabase({
+            ...req.body,
+            usuario_id: req.user.id
+        });
         
-        if (resultado) {
-            res.json({ success: true, data: resultado });
-        } else {
-            res.status(400).json({ error: "Error al agregar inventario" });
-        }
+        res.json({ success: true, data: resultado });
     } catch (error) {
         console.error("Error en inventario:", error);
-        res.status(500).json({ error: "Error del servidor" });
+        res.status(500).json({ 
+            error: error.message || "Error del servidor" 
+        });
     }
 });
 
