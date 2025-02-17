@@ -24,7 +24,7 @@ export async function agregarProducto(producto) {
 
 // Función para registrar un nuevo usuario
 export async function registrarUsuario(nombre, email, password) {
-    const { user, error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({ // Cambia "user" por "data"
         email,
         password,
     });
@@ -34,17 +34,23 @@ export async function registrarUsuario(nombre, email, password) {
         return null;
     }
 
-    // Almacenar el campo "nombre" en una tabla separada
-    const { data, error: dbError } = await supabase
-        .from("usuarios")
-        .insert([{ id: user.id, nombre, email }]);
-
-    if (dbError) {
-        console.error("Error al guardar datos adicionales del usuario:", dbError);
+    // Verificar si el usuario está disponible en "data"
+    if (!data?.user) {
+        console.error("Usuario no registrado correctamente");
         return null;
     }
 
-    return user;
+    // Usar data.user.id en lugar de user.id
+    const { data: dbData, error: dbError } = await supabase
+        .from("usuarios")
+        .insert([{ id: data.user.id, nombre, email }]);
+
+    if (dbError) {
+        console.error("Error al guardar datos adicionales:", dbError);
+        return null;
+    }
+
+    return data.user;
 }
 
 // Función para iniciar sesión
