@@ -97,4 +97,20 @@ export async function obtenerUsuarioActual() {
     return user;
 }
 
+// Nueva función para agregar inventario
+export async function agregarInventarioSupabase(inventarioData, userId) {
+    const { data, error } = await supabase
+        .from('inventario')
+        .insert([{
+            ...inventarioData,
+            usuario_id: userId
+        }]);
+
+    if (error) {
+        console.error("Error agregando inventario:", error);
+        return null;
+    }
+    return data;
+}
+
 export default supabase;
