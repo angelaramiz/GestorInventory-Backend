@@ -1,6 +1,6 @@
 import express from "express";
 import { obtenerProductos, agregarProducto } from "../services/supabase.js";
-import { escribirEnSheetsPorGid, sincronizarProductos } from "../services/sheets.js";
+import {  sincronizarProductos } from "../services/sheets.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
