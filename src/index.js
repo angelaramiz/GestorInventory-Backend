@@ -6,9 +6,12 @@ import productosRoutes from "./routes/productos.js";
 dotenv.config();
 const app = express();
 
-app.use(cors());
 app.use(express.json());
-
+app.use(cors({
+    origin: "https://gestorinventory.netlify.app", // Permite solicitudes desde este origen
+    methods: ["GET", "POST", "PUT", "DELETE"],     // Métodos HTTP permitidos
+    allowedHeaders: ["Content-Type", "Authorization"] // Encabezados permitidos
+}));
 // Rutas
 app.use("/productos", productosRoutes);
 
