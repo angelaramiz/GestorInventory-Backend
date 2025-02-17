@@ -74,7 +74,13 @@ export async function escribirEnSheets(datos, sheetName = "Productos", range = "
 export async function sincronizarProductos(productos, sheetName) {
     try {
         await limpiarHoja(sheetName);
-        const datos = productos.map(producto => [/* ... */]);
+        const datos = productos.map(producto => [
+            producto.codigo,
+            producto.nombre,
+            producto.categoria,
+            producto.marca,
+            producto.unidad
+        ]);
         
         // Corregir orden de parámetros (primero sheetName, luego datos)
         await escribirEnSheets(datos, sheetName); // <-- ¡Parámetros en orden correcto!

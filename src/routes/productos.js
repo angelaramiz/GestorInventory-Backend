@@ -1,6 +1,6 @@
 import express from "express";
-import { obtenerProductos, agregarProducto,registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
-import {  sincronizarProductos } from "../services/sheets.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
+import { sincronizarProductos } from "../services/sheets.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -97,26 +97,28 @@ router.post("/", verificarAutenticacion, async (req, res) => {
 });
 
 // Otras rutas protegidas...
+// En src/routes/productos.js
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
-    console.log("Solicitud de sincronización recibida");
     try {
-        const productos = await obtenerProductos(); // Obtener productos desde Supabase
+        const productos = await obtenerProductos();
+        const datos = await sincronizarProductos(productos, "Productos"); // <-- Capturar datos
 
-        await sincronizarProductos(productos, "Productos"); // Sincronizar con Google Sheets
-
-        res.json({ 
-            success: true, 
-            message: "Sincronización completada correctamente",
-            productos // Enviar los productos al frontend
+        res.json({
+            success: true,
+            message: "Sincronización completada",
+            productos: datos // <- Enviar datos formateados
         });
+
     } catch (error) {
         console.error("Error durante la sincronización:", error);
-        res.status(500).json({ error: "Error durante la sincronización" });
+        res.status(500).json({
+            error: error.message || "Error durante la sincronización"
+        });
     }
 });
 
 router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
-} );
+});
 
 export default router;
