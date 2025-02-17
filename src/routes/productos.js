@@ -40,8 +40,8 @@ router.post("/", async (req, res) => {
 
 // Ruta para registrar un nuevo usuario
 router.post("/registro", async (req, res) => {
-    const { email, password } = req.body;
-    const user = await registrarUsuario(email, password);
+    const { nombre, email, password } = req.body;
+    const user = await registrarUsuario(nombre, email, password);
 
     if (user) {
         res.json({ success: true, user });

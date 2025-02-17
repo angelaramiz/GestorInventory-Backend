@@ -23,8 +23,9 @@ export async function agregarProducto(producto) {
 }
 
 // Función para registrar un nuevo usuario
-export async function registrarUsuario(email, password) {
+export async function registrarUsuario(nombre, email, password) {
     const { user, error } = await supabase.auth.signUp({
+        nombre,
         email,
         password,
     });
