@@ -98,6 +98,7 @@ router.post("/", verificarAutenticacion, async (req, res) => {
 
 // Otras rutas protegidas...
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
+    console.log("Solicitud de sincronización recibida");
     try {
         const productos = await obtenerProductos(); // Obtener productos desde Supabase
 

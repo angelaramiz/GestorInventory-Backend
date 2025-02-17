@@ -8,9 +8,10 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: "https://gestorinventory.netlify.app", // Permite solicitudes desde este origen
-    methods: ["GET", "POST", "PUT", "DELETE"],     // Métodos HTTP permitidos
-    allowedHeaders: ["Content-Type", "Authorization"] // Encabezados permitidos
+    origin: "https://gestorinventory.netlify.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"], // Asegurar que Authorization está permitido
+    credentials: true
 }));
 // Rutas
 app.use("/productos", productosRoutes);

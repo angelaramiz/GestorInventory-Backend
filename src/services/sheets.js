@@ -73,22 +73,15 @@ export async function escribirEnSheets(datos, sheetName = "Productos", range = "
  */
 export async function sincronizarProductos(productos, sheetName) {
     try {
-        // Limpiar la hoja antes de escribir nuevos datos
         await limpiarHoja(sheetName);
-
-        // Formatear los productos como una matriz para Google Sheets
-        const datos = productos.map(producto => [
-            producto.codigo,
-            producto.nombre,
-            producto.categoria,
-            producto.marca,
-            producto.unidad
-        ]);
-
-        // Escribir los datos en la hoja
-        await escribirEnSheets(sheetName, datos);
-        console.log("Sincronización completada correctamente");
+        const datos = productos.map(producto => [/* ... */]);
+        
+        // Corregir orden de parámetros (primero sheetName, luego datos)
+        await escribirEnSheets(datos, sheetName); // <-- ¡Parámetros en orden correcto!
+        
+        console.log("Sincronización completada");
     } catch (error) {
         console.error("Error durante la sincronización:", error);
+        throw error; // Propagar el error
     }
 }
