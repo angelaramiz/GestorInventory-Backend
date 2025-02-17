@@ -99,14 +99,21 @@ router.post("/", verificarAutenticacion, async (req, res) => {
 // Otras rutas protegidas...
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
-        const productos = await obtenerProductos();
-        await sincronizarProductos(productos, "Productos");
-        res.json({ success: true, message: "Sincronización completada correctamente" });
+        const productos = await obtenerProductos(); // Obtener productos desde Supabase
+
+        await sincronizarProductos(productos, "Productos"); // Sincronizar con Google Sheets
+
+        res.json({ 
+            success: true, 
+            message: "Sincronización completada correctamente",
+            productos // Enviar los productos al frontend
+        });
     } catch (error) {
         console.error("Error durante la sincronización:", error);
         res.status(500).json({ error: "Error durante la sincronización" });
     }
 });
+
 router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 } );
