@@ -34,7 +34,7 @@ export async function registrarUsuario(nombre, email, password) {
         return null;
     }
 
-    // Almacenar el nombre en la tabla de usuarios
+    // Almacenar el campo "nombre" en una tabla separada
     const { data, error: dbError } = await supabase
         .from("usuarios")
         .insert([{ id: user.id, nombre, email }]);
