@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto,registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
 import {  sincronizarProductos } from "../services/sheets.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
