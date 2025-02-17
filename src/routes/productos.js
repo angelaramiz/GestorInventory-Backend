@@ -107,5 +107,8 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
         res.status(500).json({ error: "Error durante la sincronización" });
     }
 });
+router.get("/prueba", async (req, res) => {
+    res.json({ message: "Ruta de prueba" });
+} );
 
 export default router;
