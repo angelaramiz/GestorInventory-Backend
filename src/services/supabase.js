@@ -42,8 +42,12 @@ export async function registrarUsuario(nombre, email, password) {
 
     // Usar data.user.id en lugar de user.id
     const { data: dbData, error: dbError } = await supabase
-        .from("usuarios")
-        .insert([{ id: data.user.id, nombre, email }]);
+    .from("usuarios")
+    .insert([{ 
+        user_id: data.user.id, // Nuevo campo para almacenar el UUID
+        nombre, 
+        email 
+    }]);
 
     if (dbError) {
         console.error("Error al guardar datos adicionales:", dbError);
