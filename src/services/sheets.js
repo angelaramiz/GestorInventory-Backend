@@ -52,47 +52,20 @@ export async function obtenerNombresDeHojas() {
  * @param {string} range - Rango donde se escribirán los datos (ej. "A1").
  * @param {Array<Array<string>>} datos - Datos a escribir en formato de matriz.
  */
-export async function escribirEnSheets(datos) {
+export async function escribirEnSheets(datos, sheetName = "Productos", range = "A1") {
     try {
-        console.log("Intentando escribir en Google Sheets...");
-        console.log("Datos a escribir:", datos);
-
         await sheets.spreadsheets.values.append({
             spreadsheetId: process.env.SHEET_ID,
-            range: "Productos!A1",
+            range: `${sheetName}!${range}`,
             valueInputOption: "RAW",
             requestBody: { values: datos }
         });
-
-        console.log("Datos escritos correctamente en Google Sheets");
+        console.log(`Datos escritos correctamente en la hoja "${sheetName}"`);
     } catch (error) {
-        console.error("Error escribiendo en Google Sheets:", error);
+        console.error(`Error escribiendo en la hoja "${sheetName}":`, error);
     }
 }
 
-/**
- * Función para escribir datos en una hoja específica usando su GID.
- * @param {number} gid - ID de la hoja (GID).
- * @param {string} range - Rango donde se escribirán los datos (ej. "A1").
- * @param {Array<Array<string>>} datos - Datos a escribir en formato de matriz.
- */
-export async function escribirEnSheetsPorGid(gid, range, datos) {
-    try {
-        // Obtener el nombre de la hoja correspondiente al GID
-        const hojas = await obtenerNombresDeHojas();
-        const hoja = hojas.find(h => h.gid === gid);
-
-        if (!hoja) {
-            console.error(`No se encontró una hoja con GID=${gid}`);
-            return;
-        }
-
-        // Escribir en la hoja usando su nombre
-        await escribirEnSheetsPorNombre(hoja.nombre, range, datos);
-    } catch (error) {
-        console.error("Error escribiendo en Google Sheets:", error);
-    }
-}
 /**
  * Función para sincronizar productos de Supabase con Google Sheets.
  * @param {Array<Object>} productos - Lista de productos obtenida de Supabase.

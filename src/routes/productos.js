@@ -5,12 +5,6 @@ import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Im
 
 const router = express.Router();
 
-// Obtener productos desde Supabase
-router.get("/", async (req, res) => {
-    const productos = await obtenerProductos();
-    res.json(productos);
-});
-
 // Agregar producto a Supabase y Google Sheets
 router.post("/", async (req, res) => {
     const nuevoProducto = req.body;
@@ -43,21 +37,6 @@ router.post("/", async (req, res) => {
     }
 });
 
-// // Sincronizar productos de Supabase con Google Sheets
-// router.post("/sincronizar", async (req, res) => {
-//     try {
-//         // Obtener productos de Supabase
-//         const productos = await obtenerProductos();
-
-//         // Sincronizar productos con Google Sheets
-//         await sincronizarProductos(productos, "Productos");
-
-//         res.json({ success: true, message: "Sincronización completada correctamente" });
-//     } catch (error) {
-//         console.error("Error durante la sincronización:", error);
-//         res.status(500).json({ error: "Error durante la sincronización" });
-//     }
-// });
 
 // Ruta para registrar un nuevo usuario
 router.post("/registro", async (req, res) => {

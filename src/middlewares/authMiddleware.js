@@ -1,13 +1,16 @@
-import { obtenerUsuarioActual } from '../services/supabase.js';
+import { supabase } from "../services/supabase.js";
 
-export function verificarAutenticacion(req, res, next) {
-    const user = obtenerUsuarioActual();
-
-    if (user) {
-        // Si el usuario está autenticado, continuar con la siguiente función (controlador)
-        next();
-    } else {
-        // Si el usuario no está autenticado, devolver un error 401 (No autorizado)
-        res.status(401).json({ error: "No autorizado. Debes iniciar sesión para acceder a esta ruta." });
+export async function verificarAutenticacion(req, res, next) {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+        return res.status(401).json({ error: "Token no proporcionado" });
     }
+
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) {
+        return res.status(401).json({ error: "Token inválido o usuario no autenticado" });
+    }
+
+    req.user = user; // Adjuntar usuario a la solicitud
+    next();
 }
