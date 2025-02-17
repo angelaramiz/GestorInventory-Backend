@@ -120,5 +120,21 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
 router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 });
+// Nueva ruta protegida para inventario
+router.post("/inventario", verificarAutenticacion, async (req, res) => {
+    try {
+        const nuevoInventario = req.body;
+        const resultado = await agregarInventarioSupabase(nuevoInventario, req.user.id);
+        
+        if (resultado) {
+            res.json({ success: true, data: resultado });
+        } else {
+            res.status(400).json({ error: "Error al agregar inventario" });
+        }
+    } catch (error) {
+        console.error("Error en inventario:", error);
+        res.status(500).json({ error: "Error del servidor" });
+    }
+});
 
 export default router;
