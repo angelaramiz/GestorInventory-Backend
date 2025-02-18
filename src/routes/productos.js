@@ -145,4 +145,23 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
     }
 });
 
+// En src/routes/productos.js
+router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
+    try {
+        const { productos } = req.body;
+        const nuevoUserId = req.user.id; // O obtener de donde corresponda
+        
+        const result = await upsertProductosSeguro(productos, nuevoUserId);
+        
+        res.json({
+            success: true,
+            deleted: result.deletedCount,
+            inserted: result.insertedCount
+        });
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 export default router;

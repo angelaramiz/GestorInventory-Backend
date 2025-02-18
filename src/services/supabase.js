@@ -117,4 +117,27 @@ export async function agregarInventarioSupabase(inventarioData, userId) {
     return data;
 }
 
+// En src/services/supabase.js
+export async function upsertProductosSeguro(productos, nuevoUserId) {
+    const { data: deletedData, error: deleteError } = await supabase
+        .from('productos')
+        .delete()
+        .in('codigo', productos.map(p => p.codigo))
+        .eq('usuario_id', nuevoUserId);
+
+    if (deleteError) throw deleteError;
+
+    const { data: insertedData, error: insertError } = await supabase
+        .from('productos')
+        .upsert(productos.map(p => ({
+            ...p,
+            usuario_id: nuevoUserId
+        })), {
+            onConflict: ['codigo', 'usuario_id']
+        });
+
+    if (insertError) throw insertError;
+
+    return insertedData;
+}
 export default supabase;
