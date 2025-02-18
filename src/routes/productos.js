@@ -89,7 +89,7 @@ router.get("/", verificarAutenticacion, async (req, res) => {
 });
 
 // Otras rutas protegidas...
-router.post("/sincronizar", verificarAutenticacion, async (res) => {
+router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
         const productos = await obtenerProductos();
         console.log("Datos formateados:", productos); // <-- Verificar los datos formateados
