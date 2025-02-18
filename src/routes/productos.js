@@ -2,6 +2,7 @@ import express from "express";
 import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
 import { sincronizarProductos } from "../services/sheets.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
+import {supabase} from "../services/supabase.js";
 
 const router = express.Router();
 
@@ -139,5 +140,20 @@ router.post('/inventario', verificarAutenticacion, async (req, res) => {
         });
     }
 });
+
+router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
+    try {
+        const user = await obtenerUsuarioActual();
+        if (user) {
+            res.json({ success: true, message: "Token válido" });
+        } else {
+            res.status(401).json({ success: false, message: "Token no válido" });
+        }
+    } catch (error) {
+        console.error("Error al verificar el token:", error);
+        res.status(500).json({ error: error.message || "Error al verificar el token" });
+    }
+});
+
 
 export default router;
