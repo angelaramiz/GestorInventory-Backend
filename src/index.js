@@ -12,7 +12,7 @@ app.use(cors({
         "https://gestorinventory.netlify.app",
         "http://localhost:8158",
         "https://angelaramiz.github.io",
-        "http://127.0.0.1:5500/"
+        "http://127.0.0.1:5500"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"], // Asegurar que Authorization está permitido
