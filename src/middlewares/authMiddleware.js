@@ -1,16 +1,24 @@
 import supabase from "../services/supabase.js";
 
-export async function verificarAutenticacion(req, res, next) {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-        return res.status(401).json({ error: "Token no proporcionado. Por favor, inicia sesión." });
-    }
+async function verificarAutenticacion(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
 
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) {
-        return res.status(401).json({ error: "Token inválido o usuario no autenticado. Por favor, inicia sesión nuevamente." });
-    }
+        if (!authHeader) {
+            return res.status(401).json({ error: "No autorizado, falta el token" });
+        }
 
-    req.user = user; // Adjuntar usuario a la solicitud
-    next();
+        const token = authHeader.split(" ")[1]; // Extraer el token después de "Bearer"
+
+        const { data: user, error } = await supabase.auth.getUser(token);
+
+        if (error || !user) {
+            return res.status(401).json({ error: "Token inválido o expirado" });
+        }
+
+        req.user = user; // Asignar el usuario al request para que `req.user.id` funcione
+        next();
+    } catch (error) {
+        res.status(401).json({ error: "Error en autenticación" });
+    }
 }
