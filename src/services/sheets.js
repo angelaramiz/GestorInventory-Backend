@@ -73,21 +73,38 @@ export async function escribirEnSheets(datos, sheetName = "Productos", range = "
  */
 export async function sincronizarProductos(productos, sheetName) {
     try {
-        await limpiarHoja(sheetName);
-        const datos = productos.map(producto => [
+        // Configuración de autenticación y hoja de cálculo
+        const auth = new google.auth.GoogleAuth({
+            keyFile: process.env.GOOGLE_SHEETS_KEYFILE,
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        });
+
+        const client = await auth.getClient();
+        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+
+        // Formatear los datos para Google Sheets
+        const values = productos.map(producto => [
             producto.codigo,
             producto.nombre,
             producto.categoria,
             producto.marca,
             producto.unidad
         ]);
-        
-        // Corregir orden de parámetros (primero sheetName, luego datos)
-        await escribirEnSheets(datos, sheetName); // <-- ¡Parámetros en orden correcto!
-        
-        console.log("Sincronización completada");
+
+        // Escribir los datos en Google Sheets
+        const response = await sheets.spreadsheets.values.update({
+            auth: client,
+            spreadsheetId,
+            range: `${sheetName}!A2`, // Asumiendo que los datos empiezan en la fila 2
+            valueInputOption: 'RAW',
+            resource: {
+                values,
+            },
+        });
+
+        return response.data; // Asegúrate de devolver los datos correctos
     } catch (error) {
-        console.error("Error durante la sincronización:", error);
-        throw error; // Propagar el error
+        console.error('Error sincronizando productos:', error);
+        throw error;
     }
 }
