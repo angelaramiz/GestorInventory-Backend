@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({
     origin: [
-        "https://gestorinventory.netlify.app",
+        "https://angelaramiz.github.io/GestorInventory-Frontend",
         "http://localhost:8158",
         "https://angelaramiz.github.io",
         "http://127.0.0.1:5500"
