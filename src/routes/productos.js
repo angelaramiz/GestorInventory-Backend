@@ -113,6 +113,10 @@ router.get("/prueba", async (req, res) => {
 
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
+        const { codigo, nombre, cantidad } = req.body;
+         if (!codigo || !nombre || !cantidad) {
+           return res.status(400).json({ error: "Faltan campos obligatorios" });
+         }
     try {
         console.log("Usuario autenticado:", req.user);
         console.log("Datos recibidos:", req.body);
