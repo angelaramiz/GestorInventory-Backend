@@ -73,15 +73,6 @@ export async function escribirEnSheets(datos, sheetName = "Productos", range = "
  */
 export async function sincronizarProductos(productos, sheetName) {
     try {
-        // Configuración de autenticación y hoja de cálculo
-        const auth = new google.auth.GoogleAuth({
-            keyFile: process.env.GOOGLE_SHEETS_KEYFILE,
-            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-        });
-
-        const client = await auth.getClient();
-        const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
-
         // Formatear los datos para Google Sheets
         const values = productos.map(producto => [
             producto.codigo,
@@ -93,8 +84,7 @@ export async function sincronizarProductos(productos, sheetName) {
 
         // Escribir los datos en Google Sheets
         const response = await sheets.spreadsheets.values.update({
-            auth: client,
-            spreadsheetId,
+            spreadsheetId: process.env.SHEET_ID,
             range: `${sheetName}!A2`, // Asumiendo que los datos empiezan en la fila 2
             valueInputOption: 'RAW',
             resource: {
