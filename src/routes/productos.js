@@ -114,20 +114,27 @@ router.get("/prueba", async (req, res) => {
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
     try {
+        console.log("Usuario autenticado:", req.user);
+        console.log("Datos recibidos:", req.body);
+
+        if (!req.user) {
+            return res.status(401).json({ error: "Usuario no autenticado" });
+        }
+
         const { data, error } = await supabase
             .from('inventario')
-            .insert([{
-                ...req.body,
-                usuario_id: req.user.id
-            }]);
+            .insert([{ ...req.body, usuario_id: req.user.id }]);
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error en Supabase:", error);
+            throw error;
+        }
+
         res.json({ success: true, data });
-        
+
     } catch (error) {
-        res.status(500).json({ 
-            error: error.message || 'Error al guardar inventario' 
-        });
+        console.error("Error general en /inventario:", error);
+        res.status(500).json({ error: error.message || 'Error al guardar inventario' });
     }
 });
 
