@@ -94,7 +94,7 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
         const productos = await obtenerProductos();
         const datos = await sincronizarProductos(productos, "Productos"); // <-- Capturar datos
-
+        console.log("Datos formateados:", datos);
         res.json({
             success: true,
             message: "Sincronización completada",
