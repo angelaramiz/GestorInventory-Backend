@@ -7,7 +7,7 @@ import {supabase} from "../services/supabase.js";
 const router = express.Router();
 
 // Agregar producto a Supabase y Google Sheets
-router.post("/", async (req, res) => {
+router.post("/", verificarAutenticacion, async (req, res) => {
     const nuevoProducto = req.body;
 
     // Validar que los datos requeridos estén presentes
@@ -37,7 +37,6 @@ router.post("/", async (req, res) => {
         res.status(400).json({ error: "Error al agregar producto" });
     }
 });
-
 
 // Ruta para registrar un nuevo usuario
 router.post("/registro", async (req, res) => {
@@ -75,7 +74,7 @@ router.post("/logout", async (req, res) => {
 });
 
 // Ruta para obtener el usuario actual
-router.get("/usuario", async (req, res) => {
+router.get("/usuario", verificarAutenticacion, async (req, res) => {
     const user = await obtenerUsuarioActual();
 
     if (user) {
@@ -91,14 +90,7 @@ router.get("/", verificarAutenticacion, async (req, res) => {
     res.json(productos);
 });
 
-router.post("/", verificarAutenticacion, async (req, res) => {
-    const nuevoProducto = req.body;
-    const resultado = await agregarProducto(nuevoProducto);
-    res.json({ success: true, data: resultado });
-});
-
 // Otras rutas protegidas...
-// En src/routes/productos.js
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
         const productos = await obtenerProductos();
@@ -121,6 +113,7 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
 router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 });
+
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
     try {
@@ -154,6 +147,5 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
         res.status(500).json({ error: error.message || "Error al verificar el token" });
     }
 });
-
 
 export default router;

@@ -1,4 +1,4 @@
-import supabase  from "../services/supabase.js";
+import supabase from "../services/supabase.js";
 
 export async function verificarAutenticacion(req, res, next) {
     const token = req.headers.authorization?.split(" ")[1];
