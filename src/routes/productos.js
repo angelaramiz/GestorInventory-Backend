@@ -121,27 +121,21 @@ router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 });
 // Nueva ruta protegida para inventario
-router.post("/inventario", verificarAutenticacion, async (req, res) => {
-    const requiredFields = ['codigo', 'nombre', 'lote', 'cantidad'];
-    const missingFields = requiredFields.filter(field => !req.body[field]);
-
-    if (missingFields.length > 0) {
-        return res.status(400).json({ 
-            error: `Faltan campos: ${missingFields.join(', ')}` 
-        });
-    }
-
+router.post('/inventario', verificarAutenticacion, async (req, res) => {
     try {
-        const resultado = await agregarInventarioSupabase({
-            ...req.body,
-            usuario_id: req.user.id
-        });
+        const { data, error } = await supabase
+            .from('inventario')
+            .insert([{
+                ...req.body,
+                usuario_id: req.user.id
+            }]);
+
+        if (error) throw error;
+        res.json({ success: true, data });
         
-        res.json({ success: true, data: resultado });
     } catch (error) {
-        console.error("Error en inventario:", error);
         res.status(500).json({ 
-            error: error.message || "Error del servidor" 
+            error: error.message || 'Error al guardar inventario' 
         });
     }
 });
