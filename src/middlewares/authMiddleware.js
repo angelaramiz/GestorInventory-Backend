@@ -1,6 +1,6 @@
 import supabase from "../services/supabase.js";
 
-async function verificarAutenticacion(req, res, next) {
+export async function verificarAutenticacion(req, res, next) {
     try {
         const authHeader = req.headers.authorization;
 
