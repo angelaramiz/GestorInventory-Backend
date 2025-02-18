@@ -70,7 +70,11 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
-    return data.user;
+    return {
+        user: data.user,                // Datos del usuario
+        access_token: data.session.access_token,   // Token JWT
+        refresh_token: data.session.refresh_token  // Token de refresco
+    };
 }
 
 // Función para cerrar sesión
