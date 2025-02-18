@@ -1,6 +1,5 @@
 import express from "express";
 import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
-import { sincronizarProductos } from "../services/sheets.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -90,15 +89,14 @@ router.get("/", verificarAutenticacion, async (req, res) => {
 });
 
 // Otras rutas protegidas...
-router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
+router.post("/sincronizar", verificarAutenticacion, async (res) => {
     try {
         const productos = await obtenerProductos();
-        const datos = await sincronizarProductos(productos, "Productos"); // <-- Capturar datos
-        console.log("Datos formateados:", datos); // <-- Verificar los datos formateados
+        console.log("Datos formateados:", productos); // <-- Verificar los datos formateados
         res.json({
             success: true,
             message: "Sincronización completada",
-            productos: datos // <- Enviar datos formateados
+            productos: productos // <- Enviar datos formateados
         });
 
     } catch (error) {
