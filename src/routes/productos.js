@@ -169,7 +169,7 @@ router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req,
             return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
         }
 
-        if (!req.user.id) {
+        if (!req.user.user.id) {
             return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
         }
 
