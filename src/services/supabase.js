@@ -119,7 +119,7 @@ export async function agregarInventarioSupabase(inventarioData, userId) {
 
 // En src/services/supabase.js
 export async function upsertProductosSeguro(productos, nuevoUserId) {
-    const { data: deletedData, error: deleteError } = await supabase
+    const { error: deleteError } = await supabase
         .from('productos')
         .delete()
         .in('codigo', productos.map(p => p.codigo))
