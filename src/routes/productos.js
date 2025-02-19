@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, upsertProductosSeguro } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -113,10 +113,10 @@ router.get("/prueba", async (req, res) => {
 
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
-        const { codigo, nombre, cantidad } = req.body;
-         if (!codigo || !nombre || !cantidad) {
-           return res.status(400).json({ error: "Faltan campos obligatorios" });
-         }
+    const { codigo, nombre, cantidad } = req.body;
+    if (!codigo || !nombre || !cantidad) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
     try {
         console.log("Usuario autenticado:", req.user);
         console.log("Datos recibidos:", req.body);
@@ -161,15 +161,15 @@ router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req,
     try {
         const { productos } = req.body;
         const nuevoUserId = req.user.id; // O obtener de donde corresponda
-        
+
         const result = await upsertProductosSeguro(productos, nuevoUserId);
-        
+
         res.json({
             success: true,
             deleted: result.deletedCount,
             inserted: result.insertedCount
         });
-        
+
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
