@@ -124,22 +124,22 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
             .from('productos')
             .delete()
             .in('codigo', productos.map(p => p.codigo))
-            .eq('usuario_id', nuevoUserId)
-            .select('count', { count: 'exact' });
+            .eq('usuario_id', nuevoUserId);
 
         if (deleteError) throw deleteError;
 
-        const { data: insertedData, error: insertError, count: insertedCount } = await supabase
+        const { data: insertedData, error: insertError } = await supabase
             .from('productos')
             .upsert(productos.map(p => ({
                 ...p,
                 usuario_id: nuevoUserId
             })), {
                 onConflict: ['codigo', 'usuario_id']
-            })
-            .select('count', { count: 'exact' });
+            });
 
         if (insertError) throw insertError;
+
+        const insertedCount = insertedData.length;
 
         return { deletedCount, insertedCount, insertedData };
     } catch (error) {
