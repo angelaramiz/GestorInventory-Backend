@@ -184,7 +184,7 @@ router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req,
         });
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ erro: error.message });
     }
 });
 
