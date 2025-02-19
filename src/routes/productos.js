@@ -169,22 +169,23 @@ router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req,
             return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
         }
 
-        if (!req.user.user.id) {
+        if (!req.user.id) {
             return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
         }
 
-        const nuevoUserId = req.user.user.id;
+        const nuevoUserId = req.user.id;
 
         const result = await upsertProductosSeguro(productos, nuevoUserId);
 
         res.json({
             success: true,
             deleted: result.deletedCount,
-            inserted: result.insertedCount
+            inserted: result.insertedCount,
+            data: result.insertedData
         });
 
     } catch (error) {
-        res.status(500).json({ erro: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 

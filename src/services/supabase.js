@@ -119,25 +119,32 @@ export async function agregarInventarioSupabase(inventarioData, userId) {
 
 // En src/services/supabase.js
 export async function upsertProductosSeguro(productos, nuevoUserId) {
-    const { error: deleteError } = await supabase
-        .from('productos')
-        .delete()
-        .in('codigo', productos.map(p => p.codigo))
-        .eq('usuario_id', nuevoUserId);
+    try {
+        const { error: deleteError, count: deletedCount } = await supabase
+            .from('productos')
+            .delete()
+            .in('codigo', productos.map(p => p.codigo))
+            .eq('usuario_id', nuevoUserId)
+            .select('count', { count: 'exact' });
 
-    if (deleteError) throw deleteError;
+        if (deleteError) throw deleteError;
 
-    const { data: insertedData, error: insertError } = await supabase
-        .from('productos')
-        .upsert(productos.map(p => ({
-            ...p,
-            usuario_id: nuevoUserId
-        })), {
-            onConflict: ['codigo', 'usuario_id']
-        });
+        const { data: insertedData, error: insertError, count: insertedCount } = await supabase
+            .from('productos')
+            .upsert(productos.map(p => ({
+                ...p,
+                usuario_id: nuevoUserId
+            })), {
+                onConflict: ['codigo', 'usuario_id']
+            })
+            .select('count', { count: 'exact' });
 
-    if (insertError) throw insertError;
+        if (insertError) throw insertError;
 
-    return insertedData;
+        return { deletedCount, insertedCount, insertedData };
+    } catch (error) {
+        console.error("Error en upsertProductosSeguro:", error);
+        throw error;
+    }
 }
 export default supabase;
