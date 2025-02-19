@@ -122,7 +122,11 @@ router.post('/inventario', verificarAutenticacion, async (req, res) => {
         console.log("Datos recibidos:", req.body);
 
         if (!req.user) {
-            return res.status(401).json({ error: "Usuario no autenticado" });
+            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
+        }
+
+        if (!req.user.id) {
+            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
         }
 
         const { data, error } = await supabase
@@ -160,9 +164,13 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
 router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
     try {
         const { productos } = req.body;
-        console.log(req.body);
-        if (!req.user || !req.user.id) {
-            return res.status(401).json({ error: "Usuario no autenticado o ID de usuario no encontrado" });
+
+        if (!req.user) {
+            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
+        }
+
+        if (!req.user.id) {
+            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
         }
 
         const nuevoUserId = req.user.id;
