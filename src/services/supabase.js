@@ -139,7 +139,7 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
 
         if (insertError) throw insertError;
 
-        const insertedCount = insertedData.length;
+        const insertedCount = insertedData ? insertedData.length : 0;
 
         return { deletedCount, insertedCount, insertedData };
     } catch (error) {
