@@ -160,7 +160,12 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
 router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
     try {
         const { productos } = req.body;
-        const nuevoUserId = req.user.id; // O obtener de donde corresponda
+
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: "Usuario no autenticado o ID de usuario no encontrado" });
+        }
+
+        const nuevoUserId = req.user.id;
 
         const result = await upsertProductosSeguro(productos, nuevoUserId);
 
