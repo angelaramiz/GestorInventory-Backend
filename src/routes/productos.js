@@ -173,7 +173,7 @@ router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req,
             return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
         }
 
-        const nuevoUserId = req.user.id;
+        const nuevoUserId = req.user.user.id;
 
         const result = await upsertProductosSeguro(productos, nuevoUserId);
 
