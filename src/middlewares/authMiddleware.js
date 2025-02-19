@@ -16,7 +16,7 @@ export async function verificarAutenticacion(req, res, next) {
             return res.status(401).json({ error: "Token inválido o expirado" });
         }
 
-        req.user = data.user; // Asignar el usuario al request para que `req.user.id` funcione
+        req.user = user; // Asignar el usuario al request para que `req.user.id` funcione
         next();
     } catch (error) {
         res.status(401).json({ error: "Error en autenticación" });
