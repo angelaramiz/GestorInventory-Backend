@@ -118,20 +118,17 @@ router.post('/inventario', verificarAutenticacion, async (req, res) => {
         return res.status(400).json({ error: "Faltan campos obligatorios" });
     }
     try {
-        console.log("Usuario autenticado:", req.user);
-        console.log("Datos recibidos:", req.body);
-
         if (!req.user) {
             return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
         }
 
-        if (!req.user.id) {
-            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.id });
+        if (!req.user.user.id) {
+            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
         }
 
         const { data, error } = await supabase
             .from('inventario')
-            .insert([{ ...req.body, usuario_id: req.user.id }]);
+            .insert([{ ...req.body, usuario_id: req.user.user.id }]);
 
         if (error) {
             console.error("Error en Supabase:", error);
