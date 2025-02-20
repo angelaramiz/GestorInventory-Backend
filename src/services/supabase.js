@@ -131,6 +131,7 @@ export async function agregarInventarioSupabase(inventarioData, userId) {
 // En src/services/supabase.js
 export async function upsertProductosSeguro(productos, nuevoUserId) {
     try {
+        // Eliminar productos existentes del usuario
         const { error: deleteError, count: deletedCount } = await supabase
             .from('productos')
             .delete()
@@ -139,6 +140,7 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
 
         if (deleteError) throw deleteError;
 
+        // Insertar o actualizar productos
         const { data: insertedData, error: insertError } = await supabase
             .from('productos')
             .upsert(productos.map(p => ({
@@ -152,7 +154,7 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
 
         const insertedCount = insertedData ? insertedData.length : 0;
 
-        return { deletedCount, insertedCount, insertedData: insertedData || [] };
+        return { deletedCount, insertedCount, insertedData };
     } catch (error) {
         console.error("Error en upsertProductosSeguro:", error);
         throw error;
