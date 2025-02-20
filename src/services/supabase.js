@@ -147,7 +147,8 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
                 ...p,
                 usuario_id: nuevoUserId
             })), {
-                onConflict: ['codigo', 'usuario_id']
+                onConflict: ['codigo', 'usuario_id'],
+                ignoreDuplicates: true
             });
 
         if (insertError) throw insertError;

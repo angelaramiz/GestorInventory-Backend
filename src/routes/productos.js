@@ -153,6 +153,7 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
         res.status(500).json({ error: error.message || "Error al verificar el token" });
     }
 });
+
 router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
     try {
         const { productos } = req.body;
