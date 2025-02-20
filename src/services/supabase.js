@@ -91,30 +91,41 @@ export async function cerrarSesion() {
 
 // Función para obtener el usuario actual
 export async function obtenerUsuarioActual() {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data, error } = await supabase.auth.getUser();
 
     if (error) {
         console.error("Error al obtener el usuario actual:", error);
         return null;
     }
 
-    return user;
+    return data.data.user;
 }
 
 // Nueva función para agregar inventario
 export async function agregarInventarioSupabase(inventarioData, userId) {
-    const { data, error } = await supabase
-        .from('inventario')
-        .insert([{
-            ...inventarioData,
-            usuario_id: userId
-        }]);
-
-    if (error) {
-        console.error("Error agregando inventario:", error);
-        return null;
+    if (!inventarioData || !userId) {
+        console.error("Datos de inventario o ID de usuario no proporcionados");
+        return { error: "Datos de inventario o ID de usuario no proporcionados" };
     }
-    return data;
+
+    try {
+        const { data, error } = await supabase
+            .from('inventario')
+            .insert([{
+                ...inventarioData,
+                usuario_id: userId
+            }]);
+
+        if (error) {
+            console.error("Error agregando inventario:", error);
+            return { error: error.message };
+        }
+
+        return { data };
+    } catch (error) {
+        console.error("Error inesperado agregando inventario:", error);
+        return { error: error.message };
+    }
 }
 
 // En src/services/supabase.js
@@ -141,7 +152,7 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
 
         const insertedCount = insertedData ? insertedData.length : 0;
 
-        return { deletedCount, insertedCount, insertedData };
+        return { deletedCount, insertedCount, insertedData: insertedData || [] };
     } catch (error) {
         console.error("Error en upsertProductosSeguro:", error);
         throw error;

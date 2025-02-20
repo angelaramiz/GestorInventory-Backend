@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, upsertProductosSeguro, agregarInventarioSupabase } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -113,33 +113,21 @@ router.get("/prueba", async (req, res) => {
 
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
-    const { codigo, nombre, cantidad } = req.body;
-    if (!codigo || !nombre || !cantidad) {
-        return res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
     try {
-        if (!req.user) {
-            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
-        }
-
-        if (!req.user.user.id) {
-            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
-        }
-
-        const { data, error } = await agregarInventarioSupabase()
+        const { data, error } = await supabase
             .from('inventario')
-            .insert([{ ...req.body, usuario_id: req.user.user.id }]);
+            .insert([{
+                ...req.body,
+                usuario_id: req.user.id
+            }]);
 
-        if (error) {
-            console.error("Error en Supabase:", error);
-            throw error;
-        }
-
+        if (error) throw error;
         res.json({ success: true, data });
-
+        
     } catch (error) {
-        console.error("Error general en /inventario:", error);
-        res.status(500).json({ error: error.message || 'Error al guardar inventario' });
+        res.status(500).json({ 
+            error: error.message || 'Error al guardar inventario' 
+        });
     }
 });
 
@@ -154,35 +142,6 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
     } catch (error) {
         console.error("Error al verificar el token:", error);
         res.status(500).json({ error: error.message || "Error al verificar el token" });
-    }
-});
-
-// En src/routes/productos.js
-router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
-    try {
-        const { productos } = req.body;
-
-        if (!req.user) {
-            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
-        }
-
-        if (!req.user.user.id) {
-            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
-        }
-
-        const nuevoUserId = req.user.user.id;
-
-        const result = await upsertProductosSeguro(productos, nuevoUserId);
-
-        res.json({
-            success: true,
-            deleted: result.deletedCount,
-            inserted: result.insertedCount,
-            data: result.insertedData
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: error.message, user: req.user.user.id });
     }
 });
 
