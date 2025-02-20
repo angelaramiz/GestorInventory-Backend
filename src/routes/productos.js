@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, upsertProductosSeguro, supabase } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, upsertProductosSeguro, agregarInventarioSupabase } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -126,7 +126,7 @@ router.post('/inventario', verificarAutenticacion, async (req, res) => {
             return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
         }
 
-        const { data, error } = await supabase
+        const { data, error } = await agregarInventarioSupabase()
             .from('inventario')
             .insert([{ ...req.body, usuario_id: req.user.user.id }]);
 
