@@ -45,7 +45,7 @@ export async function registrarUsuario(nombre, email, password) {
     const { data: dbData, error: dbError } = await supabase
         .from("usuarios")
         .insert([{ 
-            id: data.user.id, // Esto causará un error (UUID vs integer)
+            id: data.user.id, // Asegurarse de que el ID es un UUID
             nombre, 
             email 
         }]);
