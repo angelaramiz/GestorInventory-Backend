@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual,agregarInventarioSupabase } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual,agregarInventarioSupabase,upsertProductosSeguro } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -151,6 +151,33 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
     } catch (error) {
         console.error("Error al verificar el token:", error);
         res.status(500).json({ error: error.message || "Error al verificar el token" });
+    }
+});
+router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
+    try {
+        const { productos } = req.body;
+
+        if (!req.user) {
+            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
+        }
+
+        if (!req.user.user.id) {
+            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
+        }
+
+        const nuevoUserId = req.user.user.id;
+
+        const result = await upsertProductosSeguro(productos, nuevoUserId);
+
+        res.json({
+            success: true,
+            deleted: result.deletedCount,
+            inserted: result.insertedCount,
+            data: result.insertedData
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: error.message, user: req.user.user.id });
     }
 });
 
