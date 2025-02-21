@@ -101,7 +101,7 @@ export async function obtenerUsuarioActual() {
     return data.data.user;
 }
 
-// Nueva función para agregar inventario
+
 export async function agregarInventarioSupabase(inventarioData, userId) {
     if (!inventarioData || !userId) {
         console.error("Datos de inventario o ID de usuario no proporcionados");
@@ -124,6 +124,33 @@ export async function agregarInventarioSupabase(inventarioData, userId) {
         return { data };
     } catch (error) {
         console.error("Error inesperado agregando inventario:", error);
+        return { error: error.message };
+    }
+}
+
+export async function actualizarInventarioSupabase(id, inventarioData, userId) {
+    if (!id || !inventarioData || !userId) {
+        console.error("ID, datos de inventario o ID de usuario no proporcionados");
+        return { error: "ID, datos de inventario o ID de usuario no proporcionados" };
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('inventario')
+            .update({
+                ...inventarioData,
+                usuario_id: userId
+            })
+            .eq('id', id);
+
+        if (error) {
+            console.error("Error actualizando inventario:", error);
+            return { error: error.message };
+        }
+
+        return { data };
+    } catch (error) {
+        console.error("Error inesperado actualizando inventario:", error);
         return { error: error.message };
     }
 }

@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual,agregarInventarioSupabase,upsertProductosSeguro } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual,agregarInventarioSupabase,upsertProductosSeguro, actualizarInventarioSupabase } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -111,7 +111,7 @@ router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 });
 
-// Nueva ruta protegida para inventario
+// Ruta para agregar inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
     const { codigo, nombre, cantidad } = req.body;
     if (!codigo || !nombre || !cantidad) {
@@ -137,6 +137,36 @@ router.post('/inventario', verificarAutenticacion, async (req, res) => {
     } catch (error) {
         console.error("Error general en /inventario:", error);
         res.status(500).json({ error: error.message || 'Error al guardar inventario' });
+    }
+});
+
+// Nueva ruta para actualizar inventario
+router.put('/inventario/:id', verificarAutenticacion, async (req, res) => {
+    const { id } = req.params;
+    const { codigo, nombre, cantidad } = req.body;
+    if (!codigo || !nombre || !cantidad) {
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+    }
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
+        }
+
+        if (!req.user.user.id) {
+            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
+        }
+
+        const result = await actualizarInventarioSupabase(id, req.body, req.user.user.id);
+
+        if (result.error) {
+            return res.status(500).json({ error: result.error });
+        }
+
+        res.json({ success: true, data: result.data });
+
+    } catch (error) {
+        console.error("Error general en /inventario/:id:", error);
+        res.status(500).json({ error: error.message || 'Error al actualizar inventario' });
     }
 });
 
