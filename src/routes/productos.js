@@ -1,5 +1,5 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual,agregarInventarioSupabase,upsertProductosSeguro, actualizarInventarioSupabase } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, agregarInventarioSupabase, upsertProductosSeguro, actualizarInventarioSupabase } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
