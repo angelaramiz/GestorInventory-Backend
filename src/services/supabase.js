@@ -101,58 +101,53 @@ export async function obtenerUsuarioActual() {
     return data.data.user;
 }
 
-
+// Agregar inventario
 export async function agregarInventarioSupabase(inventarioData, userId) {
     if (!inventarioData || !userId) {
-        console.error("Datos de inventario o ID de usuario no proporcionados");
-        return { error: "Datos de inventario o ID de usuario no proporcionados" };
+        console.error("Faltan datos de inventario o ID de usuario");
+        throw new Error("Datos de inventario o ID de usuario no proporcionados");
     }
 
-    try {
-        const { data, error } = await supabase
-            .from('inventario')
-            .insert([{
-                ...inventarioData,
-                usuario_id: userId
-            }]);
+    const { data, error } = await supabase
+        .from('inventario')
+        .insert([{
+            ...inventarioData,
+            usuario_id: userId,
+            last_modified: new Date().toISOString() // Agregar timestamp para manejar conflictos
+        }])
+        .select();
 
-        if (error) {
-            console.error("Error agregando inventario:", error);
-            return { error: error.message };
-        }
-
-        return { data };
-    } catch (error) {
-        console.error("Error inesperado agregando inventario:", error);
-        return { error: error.message };
+    if (error) {
+        console.error("Error agregando inventario:", error);
+        throw error;
     }
+
+    return data[0]; // Devolver el registro insertado
 }
 
+// Actualizar inventario
 export async function actualizarInventarioSupabase(id, inventarioData, userId) {
     if (!id || !inventarioData || !userId) {
-        console.error("ID, datos de inventario o ID de usuario no proporcionados");
-        return { error: "ID, datos de inventario o ID de usuario no proporcionados" };
+        console.error("Faltan ID, datos de inventario o ID de usuario");
+        throw new Error("ID, datos de inventario o ID de usuario no proporcionados");
     }
 
-    try {
-        const { data, error } = await supabase
-            .from('inventario')
-            .update({
-                ...inventarioData,
-                usuario_id: userId
-            })
-            .eq('id', id);
+    const { data, error } = await supabase
+        .from('inventario')
+        .update({
+            ...inventarioData,
+            usuario_id: userId,
+            last_modified: new Date().toISOString() // Actualizar timestamp
+        })
+        .eq('id', id)
+        .select();
 
-        if (error) {
-            console.error("Error actualizando inventario:", error);
-            return { error: error.message };
-        }
-
-        return { data };
-    } catch (error) {
-        console.error("Error inesperado actualizando inventario:", error);
-        return { error: error.message };
+    if (error) {
+        console.error("Error actualizando inventario:", error);
+        throw error;
     }
+
+    return data[0]; // Devolver el registro actualizado
 }
 
 // En src/services/supabase.js
