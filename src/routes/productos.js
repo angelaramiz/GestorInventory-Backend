@@ -64,7 +64,7 @@ router.post("/login", async (req, res) => {
     const user = await iniciarSesion(email, password);
 
     if (user) {
-res.cookie('access_token', user.access_token, {
+        res.cookie('access_token', user.access_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
             maxAge: 3600000, // 1 hora
