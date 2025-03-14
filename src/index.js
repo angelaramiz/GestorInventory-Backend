@@ -24,6 +24,9 @@ const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: 5, // Límite de 5 intentos por IP
     message: 'Demasiados intentos de inicio de sesión. Inténtalo de nuevo más tarde.',
+    keyGenerator: (req) => {
+        return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    }
 });
 
 app.use('/productos/login', limiter);
