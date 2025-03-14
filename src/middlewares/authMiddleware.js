@@ -32,7 +32,3 @@ export function verificarRol(rolRequerido) {
     };
 }
 
-// Uso en una ruta
-router.delete('/productos/:id', verificarAutenticacion, verificarRol('admin'), async (req, res) => {
-    // Solo los administradores pueden eliminar productos...
-});

@@ -1,7 +1,7 @@
 import express from "express";
 import { body, validationResult } from 'express-validator';
 import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
-import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
+import { verificarAutenticacion, verificarRol } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
 
@@ -182,6 +182,24 @@ router.post('/refresh-token', async (req, res) => {
         maxAge: 3600000,
     });
     res.json({ success: true });
+});
+
+// Nueva ruta protegida para eliminar productos
+router.delete('/productos/:id', verificarAutenticacion, verificarRol('admin'), async (req, res) => {
+    // Solo los administradores pueden eliminar productos...
+    try {
+        const { id } = req.params;
+        const { error } = await supabase
+            .from('productos')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+
+        res.json({ success: true, message: 'Producto eliminado' });
+    } catch (error) {
+        res.status(500).json({ error: error.message || 'Error al eliminar producto' });
+    }
 });
 
 export default router;
