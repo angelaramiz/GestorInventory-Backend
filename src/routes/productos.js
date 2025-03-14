@@ -1,17 +1,27 @@
 import express from "express";
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, agregarInventarioSupabase, upsertProductosSeguro, actualizarInventarioSupabase } from "../services/supabase.js";
+import { body, validationResult } from 'express-validator';
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
 import { verificarAutenticacion } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
 
-// Agregar producto a Supabase y Google Sheets
-router.post("/", verificarAutenticacion, async (req, res) => {
-    const nuevoProducto = req.body;
+// Middleware de validación para agregar producto
+const validarProducto = [
+    body('codigo').trim().isLength({ min: 1 }).withMessage('El código es obligatorio'),
+    body('nombre').trim().isLength({ min: 1 }).withMessage('El nombre es obligatorio'),
+    body('categoria').trim().isLength({ min: 1 }).withMessage('La categoría es obligatoria'),
+    body('marca').trim().isLength({ min: 1 }).withMessage('La marca es obligatoria'),
+    body('unidad').trim().isLength({ min: 1 }).withMessage('La unidad es obligatoria'),
+];
 
-    // Validar que los datos requeridos estén presentes
-    if (!nuevoProducto.codigo || !nuevoProducto.nombre || !nuevoProducto.categoria || !nuevoProducto.marca || !nuevoProducto.unidad) {
-        return res.status(400).json({ error: "Faltan campos obligatorios en el producto" });
+// Aplicar validación en la ruta POST
+router.post("/", verificarAutenticacion, validarProducto, async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+
+    const nuevoProducto = req.body;
 
     // Agregar producto a Supabase
     const resultado = await agregarProducto(nuevoProducto);
@@ -54,6 +64,16 @@ router.post("/login", async (req, res) => {
     const user = await iniciarSesion(email, password);
 
     if (user) {
+res.cookie('access_token', user.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
+            maxAge: 3600000, // 1 hora
+        });
+        res.cookie('refresh_token', user.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 86400000, // 1 día
+        });
         res.json({ success: true, user });
     } else {
         res.status(400).json({ error: "Error al iniciar sesión" });
@@ -111,42 +131,23 @@ router.get("/prueba", async (req, res) => {
     res.json({ message: "Ruta de prueba" });
 });
 
-// Ruta para agregar inventario
+// Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
-    const inventarioData = req.body;
-    if (!inventarioData.codigo || !inventarioData.nombre || !inventarioData.cantidad) {
-        return res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
-
     try {
-        const result = await agregarInventarioSupabase(inventarioData, req.user.user.id);
-        if (result.error) {
-            return res.status(500).json({ error: result.error });
-        }
-        res.json({ success: true, data: result.data });
-    } catch (error) {
-        console.error("Error en /inventario:", error);
-        res.status(500).json({ error: error.message || "Error al guardar inventario" });
-    }
-});
+        const { data, error } = await supabase
+            .from('inventario')
+            .insert([{
+                ...req.body,
+                usuario_id: req.user.id
+            }]);
 
-// Nueva ruta para actualizar inventario
-router.put('/inventario/:id', verificarAutenticacion, async (req, res) => {
-    const { id } = req.params;
-    const inventarioData = req.body;
-    if (!inventarioData.codigo || !inventarioData.nombre || !inventarioData.cantidad) {
-        return res.status(400).json({ error: "Faltan campos obligatorios" });
-    }
-
-    try {
-        const result = await actualizarInventarioSupabase(id, inventarioData, req.user.user.id);
-        if (result.error) {
-            return res.status(500).json({ error: result.error });
-        }
-        res.json({ success: true, data: result.data });
+        if (error) throw error;
+        res.json({ success: true, data });
+        
     } catch (error) {
-        console.error("Error en /inventario/:id:", error);
-        res.status(500).json({ error: error.message || "Error al actualizar inventario" });
+        res.status(500).json({ 
+            error: error.message || 'Error al guardar inventario' 
+        });
     }
 });
 
@@ -164,32 +165,23 @@ router.get("/verificar-token", verificarAutenticacion, async (req, res) => {
     }
 });
 
-router.post('/actualizar-usuario-productos', verificarAutenticacion, async (req, res) => {
-    try {
-        const { productos } = req.body;
-
-        if (!req.user) {
-            return res.status(401).json({ error: "Usuario no autenticado", user: req.user });
-        }
-
-        if (!req.user.user.id) {
-            return res.status(401).json({ error: "ID de usuario no encontrado", userId: req.user.user.id });
-        }
-
-        const nuevoUserId = req.user.user.id;
-
-        const result = await upsertProductosSeguro(productos, nuevoUserId);
-
-        res.json({
-            success: true,
-            deleted: result.deletedCount,
-            inserted: result.insertedCount,
-            data: result.insertedData
-        });
-
-    } catch (error) {
-        res.status(500).json({ error: error.message, user: req.user.user.id });
+router.post('/refresh-token', async (req, res) => {
+    const refreshToken = req.cookies.refresh_token;
+    if (!refreshToken) {
+        return res.status(401).json({ error: 'Token de refresco no proporcionado' });
     }
+
+    const { data, error } = await supabase.auth.refreshSession({ refresh_token: refreshToken });
+    if (error) {
+        return res.status(401).json({ error: 'Token de refresco inválido' });
+    }
+
+    res.cookie('access_token', data.session.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 3600000,
+    });
+    res.json({ success: true });
 });
 
 export default router;
