@@ -13,7 +13,8 @@ app.use(cors({
         "https://angelaramiz.github.io/GestorInventory-Frontend",
         "http://localhost:8158",
         "https://angelaramiz.github.io",
-        "http://127.0.0.1:5500"
+        "http://127.0.0.1:5500",
+        "https://angelaramiz.github.io/GestorInventory-Frontend/index.html"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
