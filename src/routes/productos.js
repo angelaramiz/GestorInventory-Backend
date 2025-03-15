@@ -1,6 +1,6 @@
 import express from "express";
 import { body, validationResult } from 'express-validator';
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js"; // Importar supabase
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, obtenerProductosPorCategoriaUsuario } from "../services/supabase.js"; // Importar supabase
 import { verificarAutenticacion, verificarRol } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
@@ -124,26 +124,12 @@ router.get("/", verificarAutenticacion, async (req, res) => {
 // Otras rutas protegidas...
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
-        // Suponiendo que req.user ya contiene información adicional (como area_id)
-        const { area_id } = req.user;
-        // Obtener productos filtrados por área:
-        const { data: productos, error } = await supabase
-            .from('productos')
-            .select("*")
-            .eq('area_id', area_id);
-
-        if (error) throw error;
-
-        res.json({
-            success: true,
-            message: "Sincronización completada",
-            productos: productos
-        });
+        const userId = req.user.user.id; // Obtener el ID del usuario autenticado
+        const productos = await obtenerProductosPorCategoriaUsuario(userId); // <- Función de categorías
+        res.json({ success: true, productos });
     } catch (error) {
         console.error("Error durante la sincronización:", error);
-        res.status(500).json({
-            error: error.message || "Error durante la sincronización"
-        });
+        res.status(500).json({ error: "Error al obtener productos por categoría" });
     }
 });
 

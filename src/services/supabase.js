@@ -183,4 +183,34 @@ export async function upsertProductosSeguro(productos, nuevoUserId) {
         throw error;
     }
 }
+
+export async function obtenerCategoriasUsuario(userId) {
+    const { data, error } = await supabase
+        .from("usuario_categoria")
+        .select("categoria_id")
+        .eq("usuario_id", userId);
+
+    if (error) {
+        console.error("Error obteniendo categorías del usuario:", error);
+        return [];
+    }
+    return data.map(item => item.categoria_id);
+}
+
+export async function obtenerProductosPorCategoriaUsuario(userId) {
+    const categoriasIds = await obtenerCategoriasUsuario(userId);
+    if (categoriasIds.length === 0) return [];
+
+    const { data, error } = await supabase
+        .from("productos")
+        .select("*")
+        .in("categoria_id", categoriasIds); // Filtra productos por múltiples categorías
+
+    if (error) {
+        console.error("Error obteniendo productos por categoría:", error);
+        return [];
+    }
+    return data;
+}
+
 export default supabase;
