@@ -131,6 +131,7 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
         const userId = req.user.id; // Obtener el ID del usuario autenticado
         const productos = await obtenerProductosPorCategoriaUsuario(userId); // <- Función de categorías
+        console.log("Productos sincronizados:", productos);
         res.json({ success: true, productos });
     } catch (error) {
         console.error("Error durante la sincronización:", error);
