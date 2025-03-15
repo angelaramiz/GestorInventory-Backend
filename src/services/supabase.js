@@ -220,8 +220,18 @@ export async function obtenerCategoriasUsuario(userId) {
 }
 
 export async function obtenerProductosPorCategoriaUsuario(userId) {
-    const categoriasIds = await obtenerCategoriasUsuario(userId);
-    if (categoriasIds.length === 0) return [];
+    let categoriasIds;
+    try {
+        categoriasIds = await obtenerCategoriasUsuario(userId);
+    } catch (error) {
+        console.error("Error obteniendo categorías del usuario:", error);
+        return [];
+    }
+
+    if (!categoriasIds || categoriasIds.length === 0) {
+        console.error("No categories found for the user.");
+        return [];
+    }
 
     const { data, error } = await supabase
         .from("productos")
