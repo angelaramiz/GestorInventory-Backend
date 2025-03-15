@@ -61,22 +61,27 @@ router.post("/registro", async (req, res) => {
 // Ruta para iniciar sesión
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
-    const user = await iniciarSesion(email, password);
+    try {
+        const user = await iniciarSesion(email, password);
 
-    if (user) {
-        res.cookie('access_token', user.access_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
-            maxAge: 3600000, // 1 hora
-        });
-        res.cookie('refresh_token', user.refresh_token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 86400000, // 1 día
-        });
-        res.json({ success: true, user });
-    } else {
-        res.status(400).json({ error: "Error al iniciar sesión" });
+        if (user) {
+            res.cookie('access_token', user.access_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
+                maxAge: 3600000, // 1 hora
+            });
+            res.cookie('refresh_token', user.refresh_token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 86400000, // 1 día
+            });
+            res.json({ success: true, user });
+        } else {
+            res.status(400).json({ error: "Error al iniciar sesión" });
+        }
+    } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        res.status(500).json({ error: error.message || "Error interno del servidor" });
     }
 });
 
@@ -111,14 +116,21 @@ router.get("/", verificarAutenticacion, async (req, res) => {
 // Otras rutas protegidas...
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
-        const productos = await obtenerProductos();
-        console.log("Datos formateados:", productos); // <-- Verificar los datos formateados
+        // Suponiendo que req.user ya contiene información adicional (como area_id)
+        const { area_id } = req.user;
+        // Obtener productos filtrados por área:
+        const { data: productos, error } = await supabase
+            .from('productos')
+            .select("*")
+            .eq('area_id', area_id);
+
+        if (error) throw error;
+
         res.json({
             success: true,
             message: "Sincronización completada",
-            productos: productos // <- Enviar datos formateados
+            productos: productos
         });
-
     } catch (error) {
         console.error("Error durante la sincronización:", error);
         res.status(500).json({
@@ -134,10 +146,12 @@ router.get("/prueba", async (req, res) => {
 // Nueva ruta protegida para inventario
 router.post('/inventario', verificarAutenticacion, async (req, res) => {
     try {
+        const { ubicacion, ...restoDatos } = req.body;
         const { data, error } = await supabase
             .from('inventario')
             .insert([{
-                ...req.body,
+                ...restoDatos,
+                ubicacion_almacen: ubicacion, // Nueva columna para la ubicación
                 usuario_id: req.user.id
             }]);
 
