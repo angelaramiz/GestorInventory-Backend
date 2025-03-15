@@ -44,10 +44,10 @@ export async function registrarUsuario(nombre, email, password) {
     // Insertar en la tabla "usuarios" usando las columnas existentes
     const { data: dbData, error: dbError } = await supabase
         .from("usuarios")
-        .insert([{ 
+        .insert([{
             id: data.user.id, // Asegurarse de que el ID es un UUID
-            nombre, 
-            email 
+            nombre,
+            email
         }]);
 
     if (dbError) {
@@ -72,10 +72,16 @@ export async function iniciarSesion(email, password) {
 
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
-        .from("usuarios")  // Asegúrate de que el nombre de la tabla es correcto
-        .select("id, nombre, email, categoria_id")  // Incluir el campo de categoría
+        .from("usuarios")
+        .select("id, nombre, email, categoria_id")
         .eq("id", data.user.id)
-        .single();
+        .maybeSingle(); // Evita el error si no hay filas
+
+    if (!userData) {
+        console.error("Error: Usuario no encontrado en la tabla usuarios");
+        return null;
+    }
+
 
     if (userError) {
         console.error("Error al obtener los datos del usuario:", userError);
