@@ -129,7 +129,11 @@ router.get("/", verificarAutenticacion, async (req, res) => {
 // Otras rutas protegidas...
 router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
-        const userId = req.user.id; // Obtener el ID del usuario autenticado
+        const userId = req.user?.id; // Obtener el ID del usuario autenticado
+        if (!userId) {
+            return res.status(400).json({ error: "ID de usuario no proporcionado" });
+        }
+
         const productos = await obtenerProductosPorCategoriaUsuario(userId); // <- Función de categorías
         console.log("Productos sincronizados:", productos);
         res.json({ success: true, productos });
