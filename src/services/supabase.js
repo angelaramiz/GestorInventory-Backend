@@ -77,7 +77,7 @@ export async function iniciarSesion(email, password) {
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
         .eq("id", session.user.id)
-        .Single(); // Evita el error si no hay filas
+        .single(); // Evita el error si no hay filas
 
     if (!userData) {
         console.error("Error: Usuario no encontrado en la tabla usuarios");
