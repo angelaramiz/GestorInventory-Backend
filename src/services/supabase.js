@@ -70,18 +70,11 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
-    const session = data?.session;
-
-    if (!session) {
-        console.error("Error: Sesión no encontrada");
-        return null;
-    }
-
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
-        .eq("id", session.user.id)
+        .eq("id", data.user.id)
         .single(); // Evita el error si no hay filas
 
     if (!userData) {
