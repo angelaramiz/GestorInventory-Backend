@@ -70,7 +70,12 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
-    const session = data.session;
+    const session = data?.session;
+
+    if (!session) {
+        console.error("Error: Sesión no encontrada");
+        return null;
+    }
 
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
