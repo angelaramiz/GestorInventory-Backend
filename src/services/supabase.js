@@ -74,7 +74,7 @@ export async function iniciarSesion(email, password) {
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
-        .eq("id", data.user.user.id)
+        .eq("id", data.user.id)
         .single(); // Usar .single() requiere que haya exactamente un resultado
 
     if (userError) {
