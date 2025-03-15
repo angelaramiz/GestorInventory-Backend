@@ -131,6 +131,7 @@ router.post("/sincronizar", verificarAutenticacion, async (req, res) => {
     try {
         const userId = req.user?.id; // Obtener el ID del usuario autenticado
         if (!userId) {
+            console.error("ID de usuario no proporcionado");
             return res.status(400).json({ error: "ID de usuario no proporcionado" });
         }
 

@@ -1,26 +1,18 @@
-import supabase from "../services/supabase.js";
+import supabase from '../services/supabase.js';
 
 export async function verificarAutenticacion(req, res, next) {
-    try {
-        const authHeader = req.headers.authorization;
-
-        if (!authHeader) {
-            return res.status(401).json({ error: "No autorizado, falta el token" });
-        }
-
-        const token = authHeader.split(" ")[1]; // Extraer el token después de "Bearer"
-
-        const { data: user, error } = await supabase.auth.getUser(token);
-
-        if (error || !user) {
-            return res.status(401).json({ error: "Token inválido o expirado" });
-        }
-
-        req.user = user; // Asignar el usuario al request para que `req.user.id` funcione
-        next();
-    } catch (error) {
-        res.status(401).json({ error: "Error en autenticación" });
+    const token = req.cookies.access_token;
+    if (!token) {
+        return res.status(401).json({ error: "No autenticado" });
     }
+
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data) {
+        return res.status(401).json({ error: "Autenticación fallida" });
+    }
+
+    req.user = data.user;
+    next();
 }
 
 export function verificarRol(rolRequerido) {
