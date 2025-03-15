@@ -62,6 +62,7 @@ router.post("/registro", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
+        console.log("Intentando iniciar sesión con:", { email, password }); // Agregar detalles de depuración
         const user = await iniciarSesion(email, password);
 
         if (user) {
@@ -77,6 +78,7 @@ router.post("/login", async (req, res) => {
             });
             res.json({ success: true, user });
         } else {
+            console.log("Error al iniciar sesión: Usuario no encontrado o credenciales incorrectas"); // Agregar detalles de depuración
             res.status(400).json({ error: "Error al iniciar sesión" });
         }
     } catch (error) {
