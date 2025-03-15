@@ -63,6 +63,19 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
         console.log("Intentando iniciar sesión con:", { email, password }); // Agregar detalles de depuración
+
+        // Verificar si el usuario existe
+        const { data: userExists, error: userError } = await supabase
+            .from('usuarios')
+            .select('id')
+            .eq('email', email)
+            .single();
+
+        if (userError || !userExists) {
+            console.log("Error al iniciar sesión: Usuario no encontrado");
+            return res.status(400).json({ error: "Usuario no encontrado" });
+        }
+
         const user = await iniciarSesion(email, password);
 
         if (user) {
@@ -78,8 +91,8 @@ router.post("/login", async (req, res) => {
             });
             res.json({ success: true, user });
         } else {
-            console.log("Error al iniciar sesión: Usuario no encontrado o credenciales incorrectas"); // Agregar detalles de depuración
-            res.status(400).json({ error: "Error al iniciar sesión" });
+            console.log("Error al iniciar sesión: Credenciales incorrectas");
+            res.status(400).json({ error: "Credenciales incorrectas" });
         }
     } catch (error) {
         console.error("Error al iniciar sesión:", error);
