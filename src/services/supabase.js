@@ -75,16 +75,15 @@ export async function iniciarSesion(email, password) {
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
         .eq("id", data.user.id)
-        .single(); // Evita el error si no hay filas
-
-    if (!userData) {
-        console.error("Error: Usuario no encontrado en la tabla usuarios");
-        return null;
-    }
-
+        .single(); // Usar .single() requiere que haya exactamente un resultado
 
     if (userError) {
         console.error("Error al obtener los datos del usuario:", userError);
+        return null;
+    }
+
+    if (!userData) {
+        console.error("Error: Usuario no encontrado en la tabla usuarios");
         return null;
     }
 
@@ -93,10 +92,10 @@ export async function iniciarSesion(email, password) {
             id: userData.id,
             nombre: userData.nombre,
             email: userData.email,
-            categoria_id: userData.categoria_id,  // Agregar la categoría aquí
+            categoria_id: userData.categoria_id,
         },
-        access_token: session.access_token,
-        refresh_token: session.refresh_token
+        access_token: data.session.access_token, // Corregido: usar data.session
+        refresh_token: data.session.refresh_token
     };
 }
 
