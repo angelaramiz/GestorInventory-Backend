@@ -78,7 +78,7 @@ export async function iniciarSesion(email, password) {
         .single(); // Usar .single() requiere que haya exactamente un resultado
     console.log("userData:", userData);
     if (userError) {
-        console.error("Error al obtener los datos del usuario:", data);
+        console.error("Error al obtener los datos del usuario:", userData);
         return null;
     }
 
