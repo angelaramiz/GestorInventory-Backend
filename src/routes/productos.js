@@ -65,18 +65,17 @@ router.post("/login", async (req, res) => {
         console.log("Intentando iniciar sesión con:", { email, password }); // Agregar detalles de depuración
 
         // Verificar si el usuario existe
-        const { data: userExists, error: userError } = await iniciarSesion()
-            .from('usuarios')
-            .select('id')
-            .eq('email', email)
-            .single();
+        const user = await iniciarSesion(email, password);
+        if (!user) {
+            console.log("Error al iniciar sesión: Usuario no encontrado");
+            return res.status(400).json({ error: "Usuario no encontrado" });
+        }
 
         if (userError || !userExists) {
             console.log("Error al iniciar sesión: Usuario no encontrado");
             return res.status(400).json({ error: "Usuario no encontrado" });
         }
 
-        const user = await iniciarSesion(email, password);
 
         if (user) {
             res.cookie('access_token', user.access_token, {
