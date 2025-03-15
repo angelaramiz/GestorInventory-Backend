@@ -1,6 +1,6 @@
 import express from "express";
 import { body, validationResult } from 'express-validator';
-import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual } from "../services/supabase.js";
+import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, supabase } from "../services/supabase.js"; // Importar supabase
 import { verificarAutenticacion, verificarRol } from "../middlewares/authMiddleware.js"; // Importa el middleware
 
 const router = express.Router();
