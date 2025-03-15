@@ -76,7 +76,7 @@ export async function iniciarSesion(email, password) {
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
-        .eq("id", session.user.id)
+        .eq("id", session.user.user.id)
         .maybeSingle(); // Evita el error si no hay filas
 
     if (!userData) {
