@@ -71,31 +71,25 @@ router.post("/login", async (req, res) => {
             return res.status(400).json({ error: "Usuario no encontrado" });
         }
 
-        if (userError || !userExists) {
-            console.log("Error al iniciar sesión: Usuario no encontrado");
-            return res.status(400).json({ error: "Usuario no encontrado" });
-        }
-
-
-        if (user) {
-            res.cookie('access_token', user.access_token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
-                maxAge: 3600000, // 1 hora
-            });
-            res.cookie('refresh_token', user.refresh_token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 86400000, // 1 día
-            });
-            res.json({ success: true, user });
-        } else {
-            console.log("Error al iniciar sesión: Credenciales incorrectas");
-            res.status(400).json({ error: "Credenciales incorrectas" });
-        }
+        res.cookie('access_token', user.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
+            maxAge: 3600000, // 1 hora
+        });
+        res.cookie('refresh_token', user.refresh_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 86400000, // 1 día
+        });
+        res.json({ success: true, user });
     } catch (error) {
-        console.error("Error al iniciar sesión:", error);
-        res.status(500).json({ error: error.message || "Error interno del servidor" });
+        if (error.code === 'invalid_credentials') {
+            console.error("Error al iniciar sesión: Credenciales incorrectas");
+            res.status(400).json({ error: "Credenciales incorrectas" });
+        } else {
+            console.error("Error al iniciar sesión:", error);
+            res.status(500).json({ error: error.message || "Error interno del servidor" });
+        }
     }
 });
 
