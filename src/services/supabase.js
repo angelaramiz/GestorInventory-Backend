@@ -70,11 +70,13 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
+    const session = data.session;
+
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
         .select("id, nombre, email, categoria_id")
-        .eq("id", data.user.id)
+        .eq("id", session.user.id)
         .maybeSingle(); // Evita el error si no hay filas
 
     if (!userData) {
@@ -95,8 +97,8 @@ export async function iniciarSesion(email, password) {
             email: userData.email,
             categoria_id: userData.categoria_id,  // Agregar la categoría aquí
         },
-        access_token: data.session.access_token,
-        refresh_token: data.session.refresh_token
+        access_token: session.access_token,
+        refresh_token: session.refresh_token
     };
 }
 
