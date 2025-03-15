@@ -68,7 +68,8 @@ router.post("/login", async (req, res) => {
         const user = await iniciarSesion(email, password);
         if (!user) {
             console.log("Error al iniciar sesión: Usuario no encontrado");
-            return res.status(400).json({ error: "Usuario no encontrado" });
+            return res.status(400).json({ error: data.userId });
+
         }
 
         // Configurar cookies para autenticación
