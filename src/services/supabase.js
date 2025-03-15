@@ -70,12 +70,30 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
+    // Obtener la categoría del usuario
+    const { data: userData, error: userError } = await supabase
+        .from("usuarios")  // Asegúrate de que el nombre de la tabla es correcto
+        .select("id, nombre, email, categoria_id")  // Incluir el campo de categoría
+        .eq("id", data.user.id)
+        .single();
+
+    if (userError) {
+        console.error("Error al obtener los datos del usuario:", userError);
+        return null;
+    }
+
     return {
-        user: data.user,                // Datos del usuario
-        access_token: data.session.access_token,   // Token JWT
-        refresh_token: data.session.refresh_token  // Token de refresco
+        user: {
+            id: userData.id,
+            nombre: userData.nombre,
+            email: userData.email,
+            categoria_id: userData.categoria_id,  // Agregar la categoría aquí
+        },
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
     };
 }
+
 
 // Función para cerrar sesión
 export async function cerrarSesion() {

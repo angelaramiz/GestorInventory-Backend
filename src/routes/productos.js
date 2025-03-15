@@ -62,25 +62,28 @@ router.post("/registro", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
-        console.log("Intentando iniciar sesión con:", { email, password }); // Agregar detalles de depuración
+        console.log("Intentando iniciar sesión con:", { email, password });
 
-        // Verificar si el usuario existe
+        // Verificar si el usuario existe y obtener sus datos
         const user = await iniciarSesion(email, password);
         if (!user) {
             console.log("Error al iniciar sesión: Usuario no encontrado");
             return res.status(400).json({ error: "Usuario no encontrado" });
         }
 
+        // Configurar cookies para autenticación
         res.cookie('access_token', user.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // Solo en HTTPS
-            maxAge: 3600000, // 1 hora
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 3600000,
         });
         res.cookie('refresh_token', user.refresh_token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            maxAge: 86400000, // 1 día
+            maxAge: 86400000,
         });
+
+        // Devolver usuario con su categoría incluida
         res.json({ success: true, user });
     } catch (error) {
         if (error.code === 'invalid_credentials') {
@@ -92,6 +95,7 @@ router.post("/login", async (req, res) => {
         }
     }
 });
+
 
 // Ruta para cerrar sesión
 router.post("/logout", async (req, res) => {
