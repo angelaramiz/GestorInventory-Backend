@@ -69,19 +69,20 @@ router.post("/login", async (req, res) => {
         if (!user) {
             console.log("Error al iniciar sesión: Usuario no encontrado");
             return res.status(400).json({ error: "Usuario no encontrado" });
-
         }
 
         // Configurar cookies para autenticación
         res.cookie('access_token', user.access_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 3600000,
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: 'None', // Permite cross-origin
+            maxAge: 3600000, // 1 hora
         });
         res.cookie('refresh_token', user.refresh_token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 86400000,
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: 'None', // Permite cross-origin
+            maxAge: 86400000, // 24 horas
         });
 
         // Devolver usuario con su categoría incluida
