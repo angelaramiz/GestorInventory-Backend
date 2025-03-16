@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser"; // Importa cookie-parser
 import productosRoutes from "./routes/productos.js";
 import rateLimit from 'express-rate-limit';
+import { WebSocketServer } from 'ws'; // Importa WebSocketServer
+import { suscribirCambiosInventario } from './services/supabase.js'; // Importa la función de suscripción
 
 dotenv.config();
 const app = express();
@@ -46,4 +48,24 @@ app.get('/api/supabase-config', (req, res) => {
 app.use("/productos", productosRoutes);
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+const server = app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+
+// Crear un servidor WebSocket
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) => {
+    console.log('Nuevo cliente conectado');
+
+    // Escuchar mensajes del cliente
+    ws.on('message', (message) => {
+        console.log(`Mensaje recibido: ${message}`);
+    });
+
+    // Enviar un mensaje de bienvenida
+    ws.send('Conexión WebSocket establecida');
+});
+
+console.log(`Servidor WebSocket escuchando en ws://localhost:${PORT}`);
+
+// Iniciar la suscripción a cambios en Supabase
+suscribirCambiosInventario();

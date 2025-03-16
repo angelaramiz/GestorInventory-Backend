@@ -1,8 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import WebSocket from 'ws'; // Asegúrate de tener esta importación si no está ya presente
 dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+const wss = new WebSocket.Server({ port: 8080 }); // Configura el WebSocket Server
 
 export async function obtenerProductos() {
     const { data, error } = await supabase.from("productos").select("*");
@@ -243,6 +246,26 @@ export async function obtenerProductosPorCategoriaUsuario(userId) {
         return [];
     }
     return data;
+}
+
+export async function suscribirCambiosInventario() {
+    const channel = supabase
+        .channel('inventario-real-time')
+        .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'inventario',
+        }, (payload) => {
+            // Enviar el cambio a través de WebSocket
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    client.send(JSON.stringify(payload));
+                }
+            });
+        })
+        .subscribe();
+
+    return channel;
 }
 
 export default supabase;
