@@ -62,7 +62,7 @@ wss.on('connection', (ws) => {
     });
 
     // Enviar un mensaje de bienvenida
-    ws.send('Conexión WebSocket establecida');
+    ws.send(JSON.stringify({ message: "Conexión WebSocket establecida" }));
 });
 
 console.log(`Servidor WebSocket escuchando en ws://localhost:${PORT}`);
