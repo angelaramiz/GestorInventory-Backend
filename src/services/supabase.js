@@ -1,11 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import WebSocket from 'ws'; // Asegúrate de tener esta importación si no está ya presente
+import { WebSocketServer } from 'ws'; // Importa directamente el constructor
 dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
-const wss = new WebSocket.Server({ port: 8080 }); // Configura el WebSocket Server
+const wss = new WebSocketServer({ port: 8080 }); // Configura el WebSocket Server
 
 export async function obtenerProductos() {
     const { data, error } = await supabase.from("productos").select("*");
