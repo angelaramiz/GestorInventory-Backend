@@ -73,10 +73,10 @@ export async function iniciarSesion(email, password) {
         return null;
     }
 
-    // Obtener la categoría del usuario
+    // Obtener la categoría y el rol del usuario
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
-        .select("id, nombre, email, categoria_id")
+        .select("id, nombre, email, categoria_id, rol")
         .eq("id", data.user.id)
         .single(); // Usar .single() requiere que haya exactamente un resultado
     if (userError) {
@@ -95,12 +95,12 @@ export async function iniciarSesion(email, password) {
             nombre: userData.nombre,
             email: userData.email,
             categoria_id: userData.categoria_id,
+            rol: userData.rol, // Incluir el rol del usuario
         },
-        access_token: data.session.access_token, // Corregido: usar data.session
+        access_token: data.session.access_token,
         refresh_token: data.session.refresh_token
     };
 }
-
 
 // Función para cerrar sesión
 export async function cerrarSesion() {
