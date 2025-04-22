@@ -62,18 +62,18 @@ router.post("/registro", async (req, res) => {
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
-        console.log("Intentando iniciar sesión con:", { email, password });
+        // console.log("Intentando iniciar sesión con:", { email, password });
 
         // Verificar si el usuario existe y obtener sus datos
         const user = await iniciarSesion(email, password);
-        console.log(user);
+        // console.log(user);
         if (!user) {
             console.log(email, password);
             console.log("Error al iniciar sesión: Usuario no encontrado");
             return res.status(400).json({ error: "Usuario no encontrado" });
         }
-        console.log("Usuario encontrado:", user);
-        
+        // console.log("Usuario encontrado:", user);
+
         // Configurar cookies para autenticación
         res.cookie('access_token', user.access_token, {
             httpOnly: true,
