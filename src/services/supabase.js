@@ -68,12 +68,11 @@ export async function iniciarSesion(email, password) {
         password,
     });
     //console.log(data);
-    console.log(error);
-    // if (error) {
-    //     console.error("Error al iniciar sesión:", error);
-    //     console.log("hola")
-    //     return error;
-    // }
+    console.log(data.user.id);
+    if (error) {
+        console.error("Error al iniciar sesión:", error);
+        return error;
+    }
 
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
