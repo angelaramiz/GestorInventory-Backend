@@ -66,6 +66,7 @@ router.post("/login", async (req, res) => {
 
         // Verificar si el usuario existe y obtener sus datos
         const user = await iniciarSesion(email, password);
+        console.log(user);
         if (!user) {
             console.log("Error al iniciar sesión: Usuario no encontrado");
             return res.status(400).json({ error: "Usuario no encontrado" });
