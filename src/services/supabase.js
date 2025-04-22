@@ -76,7 +76,7 @@ export async function iniciarSesion(email, password) {
     // Obtener la categoría del usuario
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
-        .select("id, nombre, email, categoria_id, rol")
+        .select("id, nombre, email, categoria_id")
         .eq("id", data.user.id)
         .single(); // Usar .single() requiere que haya exactamente un resultado
     if (userError) {
@@ -96,7 +96,7 @@ export async function iniciarSesion(email, password) {
             nombre: userData.nombre,
             email: userData.email,
             categoria_id: userData.categoria_id,
-            rol: userData.rol, // Mantener el rol del usuario
+            //rol: userData.rol, // Mantener el rol del usuario
         },
         access_token: data.session.access_token, // Corregido: usar data.session
         refresh_token: data.session.refresh_token
