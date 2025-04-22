@@ -68,6 +68,7 @@ export async function iniciarSesion(email, password) {
         password,
     });
     console.log(data);
+    console.log(error);
     if (error) {
         console.error("Error al iniciar sesión:", error);
         return null;
