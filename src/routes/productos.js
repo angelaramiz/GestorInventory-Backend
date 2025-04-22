@@ -65,6 +65,7 @@ router.post("/login", async (req, res) => {
         console.log("Intentando iniciar sesión con:", { email, password });
 
         // Verificar si el usuario existe y obtener sus datos
+        console.log(email, password);
         const user = await iniciarSesion(email, password);
         console.log(user);
         if (!user) {
