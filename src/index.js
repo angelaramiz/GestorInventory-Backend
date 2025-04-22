@@ -3,7 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser"; // Importa cookie-parser
 import productosRoutes from "./routes/productos.js";
-import rateLimit from 'express-rate-limit';
+import { apiLimiter } from './middlewares/rateLimitMiddleware.js'; // Importar los middleware de rate limiting
 import { WebSocketServer } from 'ws'; // Importa WebSocketServer
 import { suscribirCambiosInventario } from './services/supabase.js'; // Importa la función de suscripción
 
@@ -25,16 +25,8 @@ app.use(cors({
     credentials: true
 }));
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // Límite de 5 intentos por IP
-    message: 'Demasiados intentos de inicio de sesión. Inténtalo de nuevo más tarde.',
-    keyGenerator: (req) => {
-        return req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    }
-});
-
-app.use('/productos/login', limiter);
+// Aplicar el limitador de tasa global a todas las rutas
+app.use(apiLimiter);
 
 // Nuevo endpoint para devolver las credenciales de Supabase
 app.get('/api/supabase-config', (req, res) => {

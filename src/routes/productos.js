@@ -2,6 +2,7 @@ import express from "express";
 import { body, validationResult } from 'express-validator';
 import { obtenerProductos, agregarProducto, registrarUsuario, iniciarSesion, cerrarSesion, obtenerUsuarioActual, obtenerProductosPorCategoriaUsuario } from "../services/supabase.js"; // Importar supabase
 import { verificarAutenticacion, verificarRol } from "../middlewares/authMiddleware.js"; // Importa el middleware
+import { loginLimiter } from "../middlewares/rateLimitMiddleware.js"; // Importar el limitador específico para login
 
 const router = express.Router();
 
@@ -58,21 +59,18 @@ router.post("/registro", async (req, res) => {
     }
 });
 
-// Ruta para iniciar sesión
-router.post("/login", async (req, res) => {
+// Ruta para iniciar sesión con limitador de tasa
+router.post("/login", loginLimiter, async (req, res) => {
     const { email, password } = req.body;
     try {
-        // console.log("Intentando iniciar sesión con:", { email, password });
+        console.log("Intentando iniciar sesión con:", { email });
 
         // Verificar si el usuario existe y obtener sus datos
         const user = await iniciarSesion(email, password);
-        // console.log(user);
         if (!user) {
-            console.log(email, password);
             console.log("Error al iniciar sesión: Usuario no encontrado");
-            return res.status(400).json({ error: "Usuario no encontrado" });
+            return res.status(400).json({ error: "Usuario no encontrado o credenciales incorrectas" });
         }
-        // console.log("Usuario encontrado:", user);
 
         // Configurar cookies para autenticación
         res.cookie('access_token', user.access_token, {
@@ -100,7 +98,6 @@ router.post("/login", async (req, res) => {
         }
     }
 });
-
 
 // Ruta para cerrar sesión
 router.post("/logout", async (req, res) => {
