@@ -67,11 +67,11 @@ export async function iniciarSesion(email, password) {
         email,
         password,
     });
-    console.log(data);
+    //console.log(data);
     console.log(error);
     if (error) {
         console.error("Error al iniciar sesión:", error);
-        return null;
+        return data;
     }
 
     // Obtener la categoría del usuario
