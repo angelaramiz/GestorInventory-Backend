@@ -83,12 +83,12 @@ export async function iniciarSesion(email, password) {
         console.error("Error al obtener los datos del usuario:", userData);
         return null;
     }
+    console.log(data);
 
     if (!userData) {
         console.error("Error: Usuario no encontrado en la tabla usuarios");
         return null;
     }
-    console.log(data);
 
     return {
         user: {
