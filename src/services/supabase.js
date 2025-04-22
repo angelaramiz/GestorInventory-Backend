@@ -67,23 +67,30 @@ export async function iniciarSesion(email, password) {
         email,
         password,
     });
-    //console.log(data);
+
     if (error) {
         console.error("Error al iniciar sesión:", error);
-        return error;
+        return null;
     }
 
-    // Obtener la categoría del usuario
+    // Obtener la categoría del usuario y unir con la tabla roles para obtener el nombre del rol
     const { data: userData, error: userError } = await supabase
         .from("usuarios")
-        .select("id, nombre, email, categoria_id")
+        .select(`
+            id, 
+            nombre, 
+            email, 
+            categoria_id, 
+            rol_id,
+            roles:rol_id (nombre)
+        `)
         .eq("id", data.user.id)
         .single(); // Usar .single() requiere que haya exactamente un resultado
+        
     if (userError) {
         console.error("Error al obtener los datos del usuario:", userData);
         return null;
     }
-    console.log(data);
 
     if (!userData) {
         console.error("Error: Usuario no encontrado en la tabla usuarios");
@@ -96,9 +103,10 @@ export async function iniciarSesion(email, password) {
             nombre: userData.nombre,
             email: userData.email,
             categoria_id: userData.categoria_id,
-            //rol: userData.rol, // Mantener el rol del usuario
+            rol_id: userData.rol_id,
+            rol: userData.roles?.nombre // Incluir el nombre del rol del usuario
         },
-        access_token: data.session.access_token, // Corregido: usar data.session
+        access_token: data.session.access_token,
         refresh_token: data.session.refresh_token
     };
 }
