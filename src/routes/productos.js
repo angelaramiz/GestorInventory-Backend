@@ -61,49 +61,39 @@ router.post("/registro", async (req, res) => {
 // Ruta para iniciar sesión
 router.post("/login", async (req, res) => {
     const { email, password } = req.body;
-    
-    // Validar que se proporcionaron email y password
-    if (!email || !password) {
-        console.log("Error al iniciar sesión: Faltan campos requeridos");
-        return res.status(400).json({ error: "El email y la contraseña son obligatorios" });
-    }
-    
     try {
-        console.log("Intentando iniciar sesión con:", { email });
+        console.log("Intentando iniciar sesión con:", { email, password });
 
         // Verificar si el usuario existe y obtener sus datos
         const user = await iniciarSesion(email, password);
         if (!user) {
-            console.log("Error al iniciar sesión: Usuario no encontrado o credenciales incorrectas");
-            return res.status(400).json({ error: "Usuario no encontrado o credenciales incorrectas" });
+            console.log("Error al iniciar sesión: Usuario no encontrado");
+            return res.status(400).json({ error: "Usuario no encontrado" });
         }
 
-        // Configurar cookies para autenticación con opciones adecuadas para Railway
+        // Configurar cookies para autenticación
         res.cookie('access_token', user.access_token, {
             httpOnly: true,
-            secure: true, // Siempre usar secure en producción
-            sameSite: 'None', // Necesario para solicitudes cross-origin
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: 'None', // Permite cross-origin
             maxAge: 3600000, // 1 hora
         });
         res.cookie('refresh_token', user.refresh_token, {
             httpOnly: true,
-            secure: true, // Siempre usar secure en producción
-            sameSite: 'None', // Necesario para solicitudes cross-origin
+            secure: process.env.NODE_ENV === 'production', // Solo HTTPS en producción
+            sameSite: 'None', // Permite cross-origin
             maxAge: 86400000, // 24 horas
         });
 
-        // Devolver usuario con su categoría y rol incluidos
-        res.json({ success: true, user: user.user });
+        // Devolver usuario con su categoría incluida
+        res.json({ success: true, user });
     } catch (error) {
-        console.error("Error al iniciar sesión:", error);
-        
-        // Mejorar el manejo de errores con mensajes más descriptivos
         if (error.code === 'invalid_credentials') {
+            console.error("Error al iniciar sesión: Credenciales incorrectas");
             res.status(400).json({ error: "Credenciales incorrectas" });
-        } else if (error.message && error.message.includes("network")) {
-            res.status(503).json({ error: "Error de conexión con el servidor de autenticación" });
         } else {
-            res.status(500).json({ error: "Error interno del servidor" });
+            console.error("Error al iniciar sesión:", error);
+            res.status(500).json({ error: error.message || "Error interno del servidor" });
         }
     }
 });
