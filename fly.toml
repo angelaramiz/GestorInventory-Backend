@@ -10,10 +10,17 @@ primary_region = 'qro'
 
 [env]
   NODE_ENV = "production"
+<<<<<<< HEAD
   PORT = "5000"
 
 [http_service]
   internal_port = 5000
+=======
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+>>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true

@@ -173,14 +173,27 @@ const wss = new WebSocketServer({
     // Sin path específico, acepta conexiones WebSocket en cualquier ruta
 });
 
+<<<<<<< HEAD
 // Función para manejar conexiones WebSocket
 function handleWebSocketConnection(ws, req) {
     console.log(`🔌 Nuevo cliente WebSocket conectado desde ${req.socket.remoteAddress}`);
+=======
+// También crear WebSocket en la ruta raíz para compatibilidad
+const wssRoot = new WebSocketServer({ 
+    server,
+    path: '/' // WebSocket en la ruta raíz
+});
+
+// Función para manejar conexiones WebSocket
+function handleWebSocketConnection(ws, req, path = '') {
+    console.log(`🔌 Nuevo cliente WebSocket conectado${path} desde ${req.socket.remoteAddress}`);
+>>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
 
     // Enviar un mensaje de bienvenida
     ws.send(JSON.stringify({ 
         type: 'connection',
         message: "Conexión WebSocket establecida",
+        path: path,
         timestamp: new Date().toISOString()
     }));
 
@@ -188,20 +201,24 @@ function handleWebSocketConnection(ws, req) {
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            console.log(`📨 Mensaje recibido:`, data);
+            console.log(`📨 Mensaje recibido${path}:`, data);
         } catch (error) {
-            console.log(`📨 Mensaje recibido (texto plano): ${message}`);
+            console.log(`📨 Mensaje recibido${path} (texto plano): ${message}`);
         }
     });
 
     // Manejar errores de WebSocket
     ws.on('error', (error) => {
+<<<<<<< HEAD
         console.error(`❌ Error en WebSocket:`, error);
+=======
+        console.error(`❌ Error en WebSocket${path}:`, error);
+>>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
     });
 
     // Manejar desconexión
     ws.on('close', (code, reason) => {
-        console.log(`🔌 Cliente WebSocket desconectado - Código: ${code}, Razón: ${reason}`);
+        console.log(`🔌 Cliente WebSocket desconectado${path} - Código: ${code}, Razón: ${reason}`);
     });
 
     // Ping periódico para mantener la conexión
@@ -214,9 +231,18 @@ function handleWebSocketConnection(ws, req) {
     }, 30000); // Ping cada 30 segundos
 }
 
+<<<<<<< HEAD
 wss.on('connection', (ws, req) => handleWebSocketConnection(ws, req));
 
 console.log(`🔌 Servidor WebSocket disponible en ws://localhost:${PORT}`);
+=======
+wss.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (/ws)'));
+wssRoot.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (raíz)'));
+
+console.log(`🔌 Servidor WebSocket disponible en:`);
+console.log(`   ws://localhost:${PORT}/ws (ruta específica)`);
+console.log(`   ws://localhost:${PORT}/ (ruta raíz - compatibilidad)`);
+>>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
 
 // Iniciar la suscripción a cambios en Supabase con manejo de errores
 try {

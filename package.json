@@ -5,14 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "dev": "node --watch src/index.js",
-    "test-cors": "node test-cors.js",
-    "test-local": "test-local.bat",
-    "deploy": "fly deploy",
-    "logs": "fly logs",
-    "status": "fly status",
-    "verify": "curl http://localhost:5000/health"
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",

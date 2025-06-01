@@ -7,7 +7,11 @@ const TEST_ORIGINS = [
     'https://angelaramiz.github.io'
 ];
 
+<<<<<<< HEAD
 const BASE_URL = process.env.TEST_URL || 'http://localhost:5000';
+=======
+const BASE_URL = process.env.TEST_URL || 'http://localhost:8080';
+>>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
 
 async function testCORS() {
     console.log(`🧪 Probando CORS en ${BASE_URL}...`);
