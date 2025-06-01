@@ -18,12 +18,24 @@ app.use(cors({
         "http://localhost:8158",
         "https://angelaramiz.github.io",
         "http://127.0.0.1:5500",
-        "https://angelaramiz.github.io/GestorInventory-Frontend/index.html"
+        "https://angelaramiz.github.io/GestorInventory-Frontend/index.html",
+        "https://tu-app.fly.dev" // Tu dominio en Fly.io - actualiza con tu dominio real
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
+
+// Habilitar trust proxy para aplicaciones detrás de un proxy reverso (como Fly.io)
+app.enable('trust proxy');
+
+// Forzar HTTPS en producción (necesario para cookies seguras)
+app.use((req, res, next) => {
+    if (process.env.NODE_ENV === 'production' && !req.secure) {
+        return res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+    next();
+});
 
 // Aplicar el limitador de tasa global a todas las rutas
 app.use(apiLimiter);
@@ -39,7 +51,7 @@ app.get('/api/supabase-config', (req, res) => {
 // Rutas existentes
 app.use("/productos", productosRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080; // Fly.io usa 8080 por defecto
 const server = app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));;
 
 // Crear un servidor WebSocket
