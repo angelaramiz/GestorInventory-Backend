@@ -14,20 +14,51 @@ app.use(express.json());
 app.use(cookieParser()); // Usa cookie-parser
 app.use(cors({
     origin: [
+        // Orígenes de producción
         "https://angelaramiz.github.io/GestorInventory-Frontend",
-        "http://localhost:8158",
         "https://angelaramiz.github.io",
-        "http://127.0.0.1:5500",
         "https://angelaramiz.github.io/GestorInventory-Frontend/index.html",
-        "https://gestorinventory-backend.fly.dev" // Tu dominio en Fly.io - actualiza con tu dominio real
+        "https://gestorinventory-backend.fly.dev",
+        
+        // Orígenes de desarrollo local
+        "http://localhost:8158",
+        "http://localhost:3000",
+        "http://localhost:5500",
+        "http://127.0.0.1:5500",
+        "http://127.0.0.1:8158",
+        "http://127.0.0.1:3000",
+        
+        // Live Server y otros servidores de desarrollo
+        "http://localhost:5173", // Vite
+        "http://localhost:8080", // Webpack dev server
+        "http://localhost:4200"  // Angular CLI
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: [
+        "Content-Type", 
+        "Authorization", 
+        "X-Requested-With",
+        "Accept",
+        "Origin",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+    ],
+    credentials: true,
+    optionsSuccessStatus: 200 // Para IE11
 }));
 
 // Habilitar trust proxy para aplicaciones detrás de un proxy reverso (como Fly.io)
 app.enable('trust proxy');
+
+// Middleware específico para manejar preflight OPTIONS requests
+app.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Max-Age', '86400'); // 24 horas
+    res.sendStatus(200);
+});
 
 // Forzar HTTPS en producción (necesario para cookies seguras)
 app.use((req, res, next) => {
@@ -39,6 +70,14 @@ app.use((req, res, next) => {
 
 // Aplicar el limitador de tasa global a todas las rutas
 app.use(apiLimiter);
+
+// Middleware de logging para debuggear CORS
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS' || req.path.includes('/health') || req.path.includes('/api/supabase-config')) {
+        console.log(`🌐 ${req.method} ${req.path} - Origin: ${req.headers.origin}`);
+    }
+    next();
+});
 
 // Health check endpoint - no requiere autenticación
 app.get('/health', (req, res) => {
@@ -134,13 +173,21 @@ const wss = new WebSocketServer({
     path: '/ws' // Especificar ruta para WebSocket
 });
 
-wss.on('connection', (ws, req) => {
-    console.log(`🔌 Nuevo cliente WebSocket conectado desde ${req.socket.remoteAddress}`);
+// También crear WebSocket en la ruta raíz para compatibilidad
+const wssRoot = new WebSocketServer({ 
+    server,
+    path: '/' // WebSocket en la ruta raíz
+});
+
+// Función para manejar conexiones WebSocket
+function handleWebSocketConnection(ws, req, path = '') {
+    console.log(`🔌 Nuevo cliente WebSocket conectado${path} desde ${req.socket.remoteAddress}`);
 
     // Enviar un mensaje de bienvenida
     ws.send(JSON.stringify({ 
         type: 'connection',
         message: "Conexión WebSocket establecida",
+        path: path,
         timestamp: new Date().toISOString()
     }));
 
@@ -148,20 +195,20 @@ wss.on('connection', (ws, req) => {
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            console.log(`📨 Mensaje recibido:`, data);
+            console.log(`📨 Mensaje recibido${path}:`, data);
         } catch (error) {
-            console.log(`📨 Mensaje recibido (texto plano): ${message}`);
+            console.log(`📨 Mensaje recibido${path} (texto plano): ${message}`);
         }
     });
 
     // Manejar errores de WebSocket
     ws.on('error', (error) => {
-        console.error('❌ Error en WebSocket:', error);
+        console.error(`❌ Error en WebSocket${path}:`, error);
     });
 
     // Manejar desconexión
     ws.on('close', (code, reason) => {
-        console.log(`🔌 Cliente WebSocket desconectado - Código: ${code}, Razón: ${reason}`);
+        console.log(`🔌 Cliente WebSocket desconectado${path} - Código: ${code}, Razón: ${reason}`);
     });
 
     // Ping periódico para mantener la conexión
@@ -172,9 +219,14 @@ wss.on('connection', (ws, req) => {
             clearInterval(pingInterval);
         }
     }, 30000); // Ping cada 30 segundos
-});
+}
 
-console.log(`🔌 Servidor WebSocket disponible en ws://localhost:${PORT}/ws`);
+wss.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (/ws)'));
+wssRoot.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (raíz)'));
+
+console.log(`🔌 Servidor WebSocket disponible en:`);
+console.log(`   ws://localhost:${PORT}/ws (ruta específica)`);
+console.log(`   ws://localhost:${PORT}/ (ruta raíz - compatibilidad)`);
 
 // Iniciar la suscripción a cambios en Supabase con manejo de errores
 try {
