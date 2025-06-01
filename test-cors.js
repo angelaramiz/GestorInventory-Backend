@@ -8,10 +8,14 @@ const TEST_ORIGINS = [
 ];
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 const BASE_URL = process.env.TEST_URL || 'http://localhost:5000';
 =======
 const BASE_URL = process.env.TEST_URL || 'http://localhost:8080';
 >>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
+=======
+const BASE_URL = process.env.TEST_URL || 'http://localhost:5000';
+>>>>>>> d6d66c6 (Actualizar configuración de puertos a 5000, eliminar WebSocket duplicado y optimizar scripts de despliegue y verificación)
 
 async function testCORS() {
     console.log(`🧪 Probando CORS en ${BASE_URL}...`);

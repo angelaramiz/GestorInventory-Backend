@@ -29,10 +29,14 @@ timeout /t 5 /nobreak >nul
 echo Probando endpoints...
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 curl -s http://localhost:5000/ping >nul
 =======
 curl -s http://localhost:8080/ping >nul
 >>>>>>> 6b9ff48 (Actualizar configuración de CORS, ajustar puertos y agregar script de despliegue a Fly.io)
+=======
+curl -s http://localhost:5000/ping >nul
+>>>>>>> d6d66c6 (Actualizar configuración de puertos a 5000, eliminar WebSocket duplicado y optimizar scripts de despliegue y verificación)
 if errorlevel 1 (
     echo ❌ El servidor local no responde
     pause

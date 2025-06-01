@@ -5,7 +5,18 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+<<<<<<< HEAD
     "start": "node src/index.js"
+=======
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test-cors": "node test-cors.js",
+    "test-local": "test-local.bat",
+    "deploy": "fly deploy",
+    "logs": "fly logs",
+    "status": "fly status",
+    "verify": "curl http://localhost:5000/health"
+>>>>>>> d6d66c6 (Actualizar configuración de puertos a 5000, eliminar WebSocket duplicado y optimizar scripts de despliegue y verificación)
   },
   "repository": {
     "type": "git",
