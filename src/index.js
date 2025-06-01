@@ -19,7 +19,7 @@ app.use(cors({
         "https://angelaramiz.github.io",
         "http://127.0.0.1:5500",
         "https://angelaramiz.github.io/GestorInventory-Frontend/index.html",
-        "https://tu-app.fly.dev" // Tu dominio en Fly.io - actualiza con tu dominio real
+        "https://gestorinventory-backend.fly.dev" // Tu dominio en Fly.io - actualiza con tu dominio real
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
