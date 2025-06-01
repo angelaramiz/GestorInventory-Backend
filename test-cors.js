@@ -7,7 +7,7 @@ const TEST_ORIGINS = [
     'https://angelaramiz.github.io'
 ];
 
-const BASE_URL = process.env.TEST_URL || 'http://localhost:8080';
+const BASE_URL = process.env.TEST_URL || 'http://localhost:5000';
 
 async function testCORS() {
     console.log(`🧪 Probando CORS en ${BASE_URL}...`);

@@ -1,11 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
-import { WebSocketServer } from 'ws'; // Importa directamente el constructor
 dotenv.config();
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
-
-const wss = new WebSocketServer({ port: 8080 }); // Configura el WebSocket Server
 
 export async function obtenerProductos() {
     const { data, error } = await supabase.from("productos").select("*");
@@ -257,7 +254,7 @@ export async function obtenerProductosPorCategoriaUsuario(userId) {
     return data;
 }
 
-export async function suscribirCambiosInventario() {
+export async function suscribirCambiosInventario(wss) {
     const channel = supabase
         .channel('inventario-real-time')
         .on('postgres_changes', {
@@ -265,12 +262,18 @@ export async function suscribirCambiosInventario() {
             schema: 'public',
             table: 'inventario',
         }, (payload) => {
-            // Enviar el cambio a través de WebSocket
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify(payload));
-                }
-            });
+            // Enviar el cambio a través de WebSocket (recibido como parámetro)
+            if (wss && wss.clients) {
+                wss.clients.forEach((client) => {
+                    if (client.readyState === 1) { // WebSocket.OPEN = 1
+                        client.send(JSON.stringify({
+                            type: 'inventario_change',
+                            data: payload,
+                            timestamp: new Date().toISOString()
+                        }));
+                    }
+                });
+            }
         })
         .subscribe();
 

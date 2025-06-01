@@ -157,7 +157,7 @@ app.use((error, req, res, next) => {
     });
 });
 
-const PORT = process.env.PORT || 8080; // Fly.io usa 8080 por defecto
+const PORT = process.env.PORT || 5000; // Usar 5000 como puerto por defecto
 const server = app.listen(PORT, () => {
     console.log('🚀 ========================================');
     console.log(`📡 Servidor corriendo en puerto ${PORT}`);
@@ -169,25 +169,18 @@ const server = app.listen(PORT, () => {
 
 // Crear un servidor WebSocket con manejo de errores mejorado
 const wss = new WebSocketServer({ 
-    server,
-    path: '/ws' // Especificar ruta para WebSocket
-});
-
-// También crear WebSocket en la ruta raíz para compatibilidad
-const wssRoot = new WebSocketServer({ 
-    server,
-    path: '/' // WebSocket en la ruta raíz
+    server
+    // Sin path específico, acepta conexiones WebSocket en cualquier ruta
 });
 
 // Función para manejar conexiones WebSocket
-function handleWebSocketConnection(ws, req, path = '') {
-    console.log(`🔌 Nuevo cliente WebSocket conectado${path} desde ${req.socket.remoteAddress}`);
+function handleWebSocketConnection(ws, req) {
+    console.log(`🔌 Nuevo cliente WebSocket conectado desde ${req.socket.remoteAddress}`);
 
     // Enviar un mensaje de bienvenida
     ws.send(JSON.stringify({ 
         type: 'connection',
         message: "Conexión WebSocket establecida",
-        path: path,
         timestamp: new Date().toISOString()
     }));
 
@@ -195,20 +188,20 @@ function handleWebSocketConnection(ws, req, path = '') {
     ws.on('message', (message) => {
         try {
             const data = JSON.parse(message);
-            console.log(`📨 Mensaje recibido${path}:`, data);
+            console.log(`📨 Mensaje recibido:`, data);
         } catch (error) {
-            console.log(`📨 Mensaje recibido${path} (texto plano): ${message}`);
+            console.log(`📨 Mensaje recibido (texto plano): ${message}`);
         }
     });
 
     // Manejar errores de WebSocket
     ws.on('error', (error) => {
-        console.error(`❌ Error en WebSocket${path}:`, error);
+        console.error(`❌ Error en WebSocket:`, error);
     });
 
     // Manejar desconexión
     ws.on('close', (code, reason) => {
-        console.log(`🔌 Cliente WebSocket desconectado${path} - Código: ${code}, Razón: ${reason}`);
+        console.log(`🔌 Cliente WebSocket desconectado - Código: ${code}, Razón: ${reason}`);
     });
 
     // Ping periódico para mantener la conexión
@@ -221,16 +214,13 @@ function handleWebSocketConnection(ws, req, path = '') {
     }, 30000); // Ping cada 30 segundos
 }
 
-wss.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (/ws)'));
-wssRoot.on('connection', (ws, req) => handleWebSocketConnection(ws, req, ' (raíz)'));
+wss.on('connection', (ws, req) => handleWebSocketConnection(ws, req));
 
-console.log(`🔌 Servidor WebSocket disponible en:`);
-console.log(`   ws://localhost:${PORT}/ws (ruta específica)`);
-console.log(`   ws://localhost:${PORT}/ (ruta raíz - compatibilidad)`);
+console.log(`🔌 Servidor WebSocket disponible en ws://localhost:${PORT}`);
 
 // Iniciar la suscripción a cambios en Supabase con manejo de errores
 try {
-    suscribirCambiosInventario();
+    suscribirCambiosInventario(wss); // Pasar el servidor WebSocket principal
     console.log('✅ Suscripción a Supabase inicializada correctamente');
 } catch (error) {
     console.error('❌ Error al inicializar suscripción a Supabase:', error);

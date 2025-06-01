@@ -28,7 +28,7 @@ start /B npm start
 timeout /t 5 /nobreak >nul
 echo Probando endpoints...
 
-curl -s http://localhost:8080/ping >nul
+curl -s http://localhost:5000/ping >nul
 if errorlevel 1 (
     echo ❌ El servidor local no responde
     pause
